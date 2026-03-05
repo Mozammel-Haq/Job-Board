@@ -49,13 +49,13 @@ export default function HeroSection() {
                     alt=""
                     width={400}
                     height={20}
-                    className="absolute -bottom-10 left-0 w-full"
+                    className="absolute -bottom-12 left-0 w-full"
                   />
                 </span>
               </h1>
 
               <p 
-                className="text-lg leading-relaxed max-w-md mt-14"
+                className="text-lg leading-relaxed max-w-md mt-16"
                 style={{ color: '#515B6F' }}
               >
                 Great platform for the job seeker that searching for new career heights and passionate about startups.
@@ -63,7 +63,7 @@ export default function HeroSection() {
             </div>
 
             {/* Search Bar */}
-            <div className="bg-white shadow-lg lg:shadow-lg p-2.5 flex flex-col sm:flex-row gap-4 items-stretch overflow-visible relative z-50 lg:absolute lg:top-[375px] lg:left-0 lg:w-[840px]">
+            <div className="bg-white shadow-lg lg:shadow-lg p-2.5 flex flex-col sm:flex-row gap-4 items-stretch overflow-visible relative z-50 lg:absolute lg:top-[385px] lg:left-0 lg:w-[840px]">
               
               {/* Job Title Input */}
               <div className="flex-1 flex items-center gap-3 px-4 py-3 mb-0">
@@ -134,7 +134,7 @@ export default function HeroSection() {
             </div>
 
             {/* Popular Keywords */}
-            <div className="flex flex-wrap items-center gap-3 mt-4 lg:mt-32">
+            <div className="flex flex-wrap items-center gap-3 mt-6 lg:mt-32">
               <span className="font-medium text-[var(--c-text-dark)]">
                 Popular :
               </span>

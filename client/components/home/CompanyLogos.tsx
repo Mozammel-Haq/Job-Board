@@ -10,13 +10,12 @@ const companies = [
 
 export default function CompanyLogos() {
   return (
-    <section className="py-12 bg-white">
+    <section className="py-12 pb-16 bg-white">
       <div className="container-custom">
         
         {/* Heading */}
         <h2 
           className="text-lg font-normal mb-10  text-[var(--c-text-dark)]"
-        //   style={{ color: '#515B6F' }}
         >
           Companies we helped grow
         </h2>
