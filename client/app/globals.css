@@ -1,7 +1,8 @@
 @import "tailwindcss";
 
 @theme {
-  /* Colors from Figma */
+  
+  /* Colors*/
   --color-primary: #4640de;
   --color-primary-dark: #3730a3;
   --color-primary-light: #6366f1;
@@ -13,9 +14,19 @@
   --color-background-secondary: #f8f8fd;
   --color-background-dark: #202430;
 
+  --text-dark: #202430;
+  --text-gray: #515B6F;
+
   /* Font families */
   --font-family-sans: var(--font-epilogue), ui-sans-serif, system-ui, sans-serif;
   --font-family-display: var(--font-clash-display), ui-sans-serif, system-ui, sans-serif;
+  --font-size-hero: 4.5rem;       
+  --font-size-hero-mobile: 3rem;   
+  --font-size-section: 2.5rem;     
+  --font-size-heading: 2rem;      
+  --font-size-body-lg: 1.125rem;   
+  --font-size-body: 1rem;         
+  --font-size-sm: 0.875rem;  
 }
 
 @layer base {
@@ -52,4 +63,5 @@
       padding-right: 2rem;
     }
   }
+  
 }

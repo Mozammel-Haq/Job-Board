@@ -33,7 +33,7 @@ export default function Button({
         
         // Sizes
         size === 'sm' && 'px-4 py-2 text-sm',
-        size === 'md' && 'px-6 py-3 text-base',
+        size === 'md' && 'px-6 py-3.25 text-base',
         size === 'lg' && 'px-8 py-4 text-lg',
         
         // Full width

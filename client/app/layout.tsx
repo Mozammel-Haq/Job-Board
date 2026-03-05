@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { epilogue, clashDisplay } from "@/app/lib/fonts";
+import Header from "@/components/layout/Header";
 import "./globals.css";
 
 export const metadata: Metadata = {
