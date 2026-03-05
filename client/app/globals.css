@@ -14,8 +14,8 @@
   --color-background-secondary: #f8f8fd;
   --color-background-dark: #202430;
 
-  --text-dark: #202430;
-  --text-gray: #515B6F;
+  --c-text-dark: #202430;
+  --c-text-gray: #515B6F;
 
   /* Font families */
   --font-family-sans: var(--font-epilogue), ui-sans-serif, system-ui, sans-serif;

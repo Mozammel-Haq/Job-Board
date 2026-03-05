@@ -9,7 +9,7 @@ export default function HeroSection() {
   const [location, setLocation] = useState('Florence, Italy');
 
   return (
-    <section className="relative lg:max-h-[calc(100vh-2.25rem)] overflow-hidden bg-[#F8F8FD] lg:pt-0 pt-10">
+    <section className="relative lg:max-h-[calc(100vh-0.25rem)] overflow-hidden bg-[#F8F8FD] lg:pt-0 pt-10">
       
       {/* Background Pattern - Extends further left */}
       <div className="absolute right-0 lg:top-0 md:top-20 top-80 w-[65%] h-full">
@@ -134,15 +134,14 @@ export default function HeroSection() {
             </div>
 
             {/* Popular Keywords */}
-            {/* Added 'mt-4' for mobile spacing and 'lg:mt-32' for desktop spacing */}
             <div className="flex flex-wrap items-center gap-3 mt-4 lg:mt-32">
-              <span className="font-medium" style={{ color: '#515B6F' }}>
+              <span className="font-medium text-[var(--c-text-dark)]">
                 Popular :
               </span>
               
               <span
-                className="py-1 text-sm font-medium cursor-pointer text-dark"
-                style={{ color: '#515B6F' }}
+                className="py-1 text-sm font-medium cursor-pointer text-[var(--c-text-dark)]"
+              
               >
                 UI Designer, UX Researcher, Android, Admin
               </span>
@@ -150,8 +149,7 @@ export default function HeroSection() {
           </div>
 
           {/* Right Content - Hero Person Image */}
-          {/* Added 'hidden lg:block' to completely hide this section on mobile devices */}
-          <div className="relative w-full h-[400px] lg:h-[620px] hidden lg:block">
+          <div className="relative w-full h-[400px] lg:h-[640px] hidden lg:block">
             <Image
               src="/images/hero-person.png"
               alt="Professional pointing"

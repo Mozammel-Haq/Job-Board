@@ -1,5 +1,6 @@
 import Header from '@/components/layout/Header';
 import HeroSection from '@/components/home/HeroSection';
+import CompanyLogos from '@/components/home/CompanyLogos';
 
 export default function Home() {
   return (
@@ -7,7 +8,7 @@ export default function Home() {
       <Header />
       <main>
         <HeroSection />
-        
+        <CompanyLogos/>
         {/* Temporary spacing */}
         <div className="h-screen bg-gray-100 flex items-center justify-center">
           <p className="text-2xl font-bold" style={{ color: '#25324B' }}>
