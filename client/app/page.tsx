@@ -5,6 +5,7 @@ import CategoriesGrid from '@/components/home/CategoriesGrid';
 import CTABanner from '@/components/home/CTABanner';
 import FeaturedJobs from '@/components/home/FeaturedJobs';
 import LatestJobs from '@/components/home/LatestJobs';
+import Footer from '@/components/layout/Footer';
 
 export default function Home() {
   return (
@@ -17,13 +18,8 @@ export default function Home() {
         <CTABanner/>
         <FeaturedJobs/>
         <LatestJobs/>
-        {/* Temporary spacing */}
-        <div className="h-screen bg-gray-100 flex items-center justify-center">
-          <p className="text-2xl font-bold" style={{ color: '#25324B' }}>
-            Next Section Coming Soon...
-          </p>
-        </div>
       </main>
+      <Footer/>
     </>
   );
 }

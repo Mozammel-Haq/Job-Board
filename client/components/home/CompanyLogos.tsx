@@ -10,7 +10,7 @@ const companies = [
 
 export default function CompanyLogos() {
   return (
-    <section className="py-12 pb-16 bg-white">
+    <section id='companies' className="py-12 pb-16 bg-white">
       <div className="container-custom">
         
         {/* Heading */}

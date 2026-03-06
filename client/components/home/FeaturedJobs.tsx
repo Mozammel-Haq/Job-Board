@@ -119,7 +119,7 @@ export default function FeaturedJobs() {
   };
 
   return (
-    <section className="py-20 bg-white">
+    <section id='jobs' className="py-20 bg-white">
       <div className="container-custom">
         {/* Section Header */}
         <div className="flex items-center justify-between mb-12">

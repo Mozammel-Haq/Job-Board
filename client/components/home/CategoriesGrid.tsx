@@ -14,7 +14,7 @@ const categories = [
 
 export default function CategoriesGrid() {
   return (
-    <section className="py-20" style={{ backgroundColor: '#F8F8FD' }}>
+    <section id='categories' className="py-20" style={{ backgroundColor: '#F8F8FD' }}>
       <div className="container-custom">
         
         {/* Section Header */}

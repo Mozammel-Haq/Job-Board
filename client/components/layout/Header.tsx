@@ -37,7 +37,7 @@ export default function Header() {
               Find Jobs
             </Link>
             <Link 
-              href="/companies" 
+              href="#companies" 
               className="font-medium transition-colors hover:text-primary"
               style={{ color: '#515B6F' }}
             >
@@ -127,7 +127,7 @@ export default function Header() {
           <div className="md:hidden py-4 border-gray-100 bg-[#F8F8FD]">
   <div className="flex flex-col gap-2 items-center">
     <Link
-      href="#jobs"
+      href="/jobs"
       className="font-medium py-2 transition-colors hover:text-primary text-center"
       style={{ color: '#515B6F' }}
       onClick={() => setMobileMenuOpen(false)}
