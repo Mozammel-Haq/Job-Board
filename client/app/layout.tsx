@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { epilogue, clashDisplay } from "@/app/lib/fonts";
+import { epilogue, clashDisplay } from "@/lib/fonts";
 import Header from "@/components/layout/Header";
 import "./globals.css";
 
