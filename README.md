@@ -3,8 +3,8 @@
 A professional full-stack job board application that connects employers with talented job seekers. Built with Next.js and Laravel, featuring intelligent job search, real-time application tracking, and a powerful admin dashboard.
 
 ![QuickHire](https://img.shields.io/badge/Status-Live-success?style=for-the-badge)
-![Next.js](https://img.shields.io/badge/Next.js-15-black?style=for-the-badge&logo=next.js)
-![Laravel](https://img.shields.io/badge/Laravel-11-red?style=for-the-badge&logo=laravel)
+![Next.js](https://img.shields.io/badge/Next.js-16-black?style=for-the-badge&logo=next.js)
+![Laravel](https://img.shields.io/badge/Laravel-12-red?style=for-the-badge&logo=laravel)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?style=for-the-badge&logo=typescript)
 
 ## 🌐 Live Demo
@@ -23,7 +23,8 @@ This project was developed as part of a technical assessment, demonstrating prof
 
 ### For Job Seekers
 - **Smart Search** - Find jobs by title, company, or keywords
-- **Advanced Filtering** - Filter by category, location, and employment type
+- **Scalable Filtering** - Dynamic filters for categories, locations, and employment types with a searchable dropdown for 100+ locations
+- **Dynamic Category Counts** - Real-time job counts for each category on the home page
 - **Detailed Job Pages** - View complete job descriptions, requirements, and benefits
 - **Easy Applications** - Submit applications with resume links and cover notes
 - **Responsive Design** - Seamless experience across all devices
@@ -125,9 +126,9 @@ npm install
 cp .env.example .env.local
 ```
 
-4. Add your API endpoint to `.env.local`:
+5. Add your backend URL to `.env.local`. The frontend uses a **Next.js Rewrite Proxy** (`/api-proxy` and `/storage-proxy`) to safely communicate with the backend and resolve Mixed Content issues:
 ```env
-NEXT_PUBLIC_API_URL=http://localhost:8000/api
+NEXT_PUBLIC_API_URL=http://your-backend-url.com/api
 ```
 
 5. Start the development server:
@@ -264,6 +265,12 @@ GET /api/jobs?category=Technology
 GET /api/jobs?location=USA
 GET /api/jobs?employment_type=Full Time
 GET /api/jobs?page=2
+
+**Get Dynamic Filter Options**
+```http
+GET /api/jobs/filters
+```
+Returns distinct categories (with job counts), locations, and employment types directly from the database to ensure UI scalability.
 ```
 
 **Get Single Job**
@@ -479,6 +486,7 @@ CREATE TABLE applications (
 - **SQL Injection Prevention** - Eloquent ORM with parameter binding
 - **XSS Protection** - Auto-escaping in React and Laravel Blade
 - **Password Security** - Bcrypt hashing with salt
+- **Mixed Content Proxy** - Custom `/storage-proxy` and `/api-proxy` to serve backend assets and data over secure HTTPS in production
 - **Environment Variables** - Sensitive data stored in .env files
 
 ## ✅ Requirements Checklist
