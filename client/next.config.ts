@@ -11,6 +11,18 @@ const nextConfig: NextConfig = {
         port: '8000',
         pathname: '/storage/**',
       },
+      {
+        protocol: 'http',
+        hostname: 'mozammel.intelsofts.com',
+        port: '',
+        pathname: '/job-board/public/storage/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'mozammel.intelsofts.com',
+        port: '',
+        pathname: '/job-board/public/storage/**',
+      },
     ],
   },
 };

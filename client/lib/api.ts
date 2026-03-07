@@ -1,4 +1,5 @@
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
+import type { Application } from '@/lib/types';
 
 interface ApiResponse<T = any> {
   data?: T;
@@ -207,7 +208,7 @@ class ApiService {
         .map(([k, v]) => [k, String(v)])
     ).toString() : '';
     
-    return this.request(`/admin/applications${queryString}`);
+    return this.request<{ data: Application[]; meta?: any; links?: any }>(`/admin/applications${queryString}`);
   }
 
   async updateApplicationStatus(id: number, status: string) {
