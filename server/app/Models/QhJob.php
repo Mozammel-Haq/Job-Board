@@ -38,7 +38,7 @@ class QhJob extends Model
 
     public function applications(): HasMany
     {
-        return $this->hasMany(Application::class, 'job_id');
+        return $this->hasMany(Application::class, 'qhjob_id');
     }
 
     // Scopes For Filtering
