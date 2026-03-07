@@ -7,12 +7,16 @@ import { api } from '@/lib/api';
 import { Application } from '@/lib/types';
 import AdminCard from '@/components/admin/AdminCard';
 import JobLoader from '@/components/ui/JobLoader';
+import Pagination from '@/components/ui/Pagination';
 
 export default function ApplicantsPage() {
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
   const [applications, setApplications] = useState<Application[]>([]);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalApplications, setTotalApplications] = useState(0);
   const [updatingId, setUpdatingId] = useState<number | null>(null);
 
   useEffect(() => {
@@ -20,21 +24,27 @@ export default function ApplicantsPage() {
       router.push('/login');
       return;
     }
-    
+
     const currentUser = getUser();
     if (!currentUser?.is_admin) {
       router.push('/');
       return;
     }
-    
-    setUser(currentUser);
-    loadApplications();
-  }, [router]);
 
-  const loadApplications = async () => {
+    setUser(currentUser);
+    loadApplications(currentPage);
+  }, [router, currentPage]);
+
+  const loadApplications = async (page: number = 1) => {
+    setLoading(true);
     try {
-      const response = await api.getApplications({ per_page: 50 });
+      const response = await api.getApplications({
+        page,
+        per_page: 10
+      });
       setApplications(response.data || []);
+      setTotalPages(response.meta.last_page);
+      setTotalApplications(response.meta.total);
     } catch (error) {
       console.error('Failed to load applications:', error);
     } finally {
@@ -46,7 +56,7 @@ export default function ApplicantsPage() {
     setUpdatingId(id);
     try {
       await api.updateApplicationStatus(id, status);
-      setApplications(applications.map(app => 
+      setApplications(applications.map(app =>
         app.id === id ? { ...app, status: status as any } : app
       ));
     } catch (error) {
@@ -59,7 +69,7 @@ export default function ApplicantsPage() {
 
   const handleDelete = async (id: number) => {
     if (!confirm('Are you sure you want to delete this application?')) return;
-    
+
     try {
       await api.deleteApplication(id);
       setApplications(applications.filter(app => app.id !== id));
@@ -82,8 +92,8 @@ export default function ApplicantsPage() {
   if (!user) return <JobLoader />;
 
   return (
-    <AdminCard 
-      title="All Applicants" 
+    <AdminCard
+      title="All Applicants"
       description="Manage and review job applications"
     >
       {loading ? (
@@ -126,7 +136,7 @@ export default function ApplicantsPage() {
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center justify-end gap-2">
-                      <select 
+                      <select
                         className="text-sm border border-gray-200 rounded p-1 bg-white focus:outline-none focus:ring-2 focus:ring-primary/20"
                         value={app.status}
                         onChange={(e) => handleUpdateStatus(app.id, e.target.value)}
@@ -137,9 +147,9 @@ export default function ApplicantsPage() {
                         <option value="accepted">Accepted</option>
                         <option value="rejected">Rejected</option>
                       </select>
-                      <a 
-                        href={app.resume_url} 
-                        target="_blank" 
+                      <a
+                        href={app.resume_url}
+                        target="_blank"
                         rel="noopener noreferrer"
                         className="p-2 hover:bg-gray-100 rounded transition-colors cursor-pointer"
                         title="View Resume"
@@ -164,6 +174,14 @@ export default function ApplicantsPage() {
             </tbody>
           </table>
         </div>
+      )}
+
+      {!loading && applications.length > 0 && (
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+        />
       )}
     </AdminCard>
   );

@@ -177,10 +177,12 @@ class QhJobController extends Controller
         $pendingApplications = \App\Models\Application::pending()->count();
 
         return response()->json([
-            'total_jobs' => $totalJobs,
-            'active_jobs' => $activeJobs,
-            'total_applications' => $totalApplications,
-            'pending_applications' => $pendingApplications,
+            'data' => [
+                'total_jobs' => $totalJobs,
+                'active_jobs' => $activeJobs,
+                'total_applications' => $totalApplications,
+                'pending_applications' => $pendingApplications,
+            ]
         ]);
     }
 
@@ -246,7 +248,9 @@ class QhJobController extends Controller
             ];
         }
 
-        return response()->json($days);
+        return response()->json([
+            'data' => $days
+        ]);
     }
 
     public function monthlyStats()
@@ -273,7 +277,9 @@ class QhJobController extends Controller
                 'jobApplied' => $applied,
             ];
         }
-        return response()->json($weeks);
+        return response()->json([
+            'data' => $weeks
+        ]);
     }
 
     public function yearlyStats()
@@ -297,6 +303,8 @@ class QhJobController extends Controller
                 'jobApplied' => $applied,
             ];
         }
-        return response()->json($months);
+        return response()->json([
+            'data' => $months
+        ]);
     }
 }

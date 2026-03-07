@@ -8,12 +8,16 @@ import { api } from '@/lib/api';
 import { Job } from '@/lib/types';
 import AdminCard from '@/components/admin/AdminCard';
 import JobLoader from '@/components/ui/JobLoader';
+import Pagination from '@/components/ui/Pagination';
 
 export default function AdminJobsPage() {
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalJobs, setTotalJobs] = useState(0);
   const [deletingId, setDeletingId] = useState<number | null>(null);
 
   useEffect(() => {
@@ -21,21 +25,27 @@ export default function AdminJobsPage() {
       router.push('/login');
       return;
     }
-    
+
     const currentUser = getUser();
     if (!currentUser?.is_admin) {
       router.push('/');
       return;
     }
-    
-    setUser(currentUser);
-    loadJobs();
-  }, [router]);
 
-  const loadJobs = async () => {
+    setUser(currentUser);
+    loadJobs(currentPage);
+  }, [router, currentPage]);
+
+  const loadJobs = async (page: number = 1) => {
+    setLoading(true);
     try {
-      const response = await api.getAdminJobs({ per_page: 50 });
+      const response = await api.getAdminJobs({
+        page,
+        per_page: 10
+      });
       setJobs(response.data);
+      setTotalPages(response.meta.last_page);
+      setTotalJobs(response.meta.total);
     } catch (error) {
       console.error('Failed to load jobs:', error);
     } finally {
@@ -65,8 +75,8 @@ export default function AdminJobsPage() {
       await api.updateJob(String(job.id), {
         is_active: !job.is_active,
       });
-      
-      setJobs(jobs.map(j => 
+
+      setJobs(jobs.map(j =>
         j.id === job.id ? { ...j, is_active: !j.is_active } : j
       ));
     } catch (error) {
@@ -80,8 +90,8 @@ export default function AdminJobsPage() {
   }
 
   return (
-    <AdminCard 
-      title="Job Listings" 
+    <AdminCard
+      title="Job Listings"
       description="Manage all your job postings"
       actions={
         <Button variant="primary" onClick={() => router.push('/admin/jobs/new')} size='md'>
@@ -151,7 +161,7 @@ export default function AdminJobsPage() {
                     <p style={{ color: '#515B6F' }}>{job.location}</p>
                   </td>
                   <td className="px-6 py-4">
-                    <span 
+                    <span
                       className="px-3 py-1 text-xs font-medium border rounded-full whitespace-nowrap"
                       style={{
                         color: '#4640DE',
@@ -169,11 +179,10 @@ export default function AdminJobsPage() {
                   <td className="px-6 py-4">
                     <button
                       onClick={() => handleToggleStatus(job)}
-                      className={`px-3 py-1 text-xs font-medium rounded-full transition-colors whitespace-nowrap ${
-                        job.is_active
+                      className={`px-3 py-1 text-xs font-medium rounded-full transition-colors whitespace-nowrap ${job.is_active
                           ? 'bg-green-100 text-green-700 hover:bg-green-200'
                           : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                      }`}
+                        }`}
                     >
                       {job.is_active ? 'Active' : 'Inactive'}
                     </button>
@@ -220,6 +229,14 @@ export default function AdminJobsPage() {
             </tbody>
           </table>
         </div>
+      )}
+
+      {!loading && jobs.length > 0 && (
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+        />
       )}
     </AdminCard>
   );
