@@ -10,7 +10,7 @@ A professional full-stack job board application that connects employers with tal
 ## 🌐 Live Demo
 
 - **Application:** https://job-board-five-sage.vercel.app/
-- **API Endpoint:** http://mozammel.intelsofts.com/job-board.public/api
+- **API Endpoint:** http://mozammel.intelsofts.com/job-board/public/api
 - **Demo Video:** Due to Some Personal Health Issues, I am unable to provide the demo video. But you can check the live demo and the code. I hope you will like it.
     
 ## 🎯 Project Overview
