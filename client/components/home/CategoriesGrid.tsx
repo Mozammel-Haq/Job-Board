@@ -26,12 +26,15 @@ export default function CategoriesGrid() {
     const fetchCounts = async () => {
       try {
         const filters = await api.getJobFilters();
-        const mapped = filters.categories.map((cat, index) => ({
-          title: cat.name,
-          count: cat.count,
-          icon: categoryIcons[cat.name] || defaultIcon,
-          featured: cat.name === 'Marketing' // logic for featured if needed
-        }));
+        const mapped = filters.categories
+          .sort((a, b) => b.count - a.count)
+          .slice(0, 8)
+          .map((cat, index) => ({
+            title: cat.name,
+            count: cat.count,
+            icon: categoryIcons[cat.name] || defaultIcon,
+            featured: cat.name === 'Marketing'
+          }));
         setDynamicCategories(mapped);
       } catch (error) {
         console.error('Failed to fetch category counts:', error);
