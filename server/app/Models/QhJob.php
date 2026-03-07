@@ -12,7 +12,7 @@ class QhJob extends Model
 
     protected $table = 'qhjobs';
     protected $fillable = [
-     'title',
+        'title',
         'company',
         'location',
         'category',
