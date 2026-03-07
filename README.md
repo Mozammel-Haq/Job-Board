@@ -11,8 +11,8 @@ A professional full-stack job board application that connects employers with tal
 
 - **Application:** https://job-board-five-sage.vercel.app/
 - **API Endpoint:** http://mozammel.intelsofts.com/job-board.public/api
-- **Demo Video:** [Watch 5-min Walkthrough](your-loom-link)
-
+- **Demo Video:** Due to Some Personal Health Issues, I am unable to provide the demo video. But you can check the live demo and the code. I hope you will like it.
+    
 ## 🎯 Project Overview
 
 QuickHire is a comprehensive job board platform designed to streamline the hiring process. Job seekers can browse listings, apply filters to find relevant opportunities, and submit applications directly through the platform. Employers can manage job postings, track applications, and gain insights through an analytics dashboard.
