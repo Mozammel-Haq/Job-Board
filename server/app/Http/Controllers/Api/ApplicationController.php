@@ -55,10 +55,10 @@ class ApplicationController extends Controller
     public function store(StoreApplicationRequest $request)
     {
         // Check if job exists and is active
-        $job = QhJob::active()->findOrFail($request->job_id);
+        $job = QhJob::active()->findOrFail($request->qhjob_id);
 
         // Check if user already applied to this job
-        $existingApplication = Application::where('job_id', $request->job_id)
+        $existingApplication = Application::where('qhjob_id', $request->qhjob_id)
             ->where('email', $request->email)
             ->first();
 

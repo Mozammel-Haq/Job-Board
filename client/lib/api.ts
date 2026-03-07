@@ -141,6 +141,37 @@ class ApiService {
     return this.request('/admin/jobs/statistics');
   }
 
+  async getWeeklyStats() {
+    return this.request('/admin/jobs/weekly-stats');
+  }
+  async getMonthlyStats() {
+    return this.request('/admin/jobs/monthly-stats');
+  }
+  async getYearlyStats() {
+    return this.request('/admin/jobs/yearly-stats');
+  }
+  async uploadJobLogo(file: File) {
+    const token = this.getAuthToken();
+    const formData = new FormData();
+    formData.append('logo', file);
+    const response = await fetch(`${API_BASE_URL}/admin/jobs/logo`, {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        ...(token && { 'Authorization': `Bearer ${token}` }),
+      },
+      body: formData,
+    });
+    const data = await response.json();
+    if (!response.ok) {
+      throw {
+        status: response.status,
+        message: data.message || 'Failed to upload logo',
+        errors: data.errors,
+      };
+    }
+    return data;
+  }
   // Application endpoints
   async submitApplication(data: {
     job_id: number;
@@ -149,9 +180,17 @@ class ApiService {
     resume_url: string;
     cover_note: string;
   }) {
+    // Map client field to server expected key
+    const payload = {
+      qhjob_id: data.job_id,
+      name: data.name,
+      email: data.email,
+      resume_url: data.resume_url,
+      cover_note: data.cover_note,
+    };
     return this.request('/applications', {
       method: 'POST',
-      body: JSON.stringify(data),
+      body: JSON.stringify(payload),
     });
   }
 

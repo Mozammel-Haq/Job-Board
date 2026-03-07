@@ -31,6 +31,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/admin/jobs/{qhjob}', [QhJobController::class, 'update']);
     Route::delete('/admin/jobs/{qhjob}', [QhJobController::class, 'destroy']);
     Route::get('/admin/jobs/statistics', [QhJobController::class, 'statistics']);
+    Route::post('/admin/jobs/logo', [QhJobController::class, 'uploadLogo']);
+    Route::get('/admin/jobs/weekly-stats', [QhJobController::class, 'weeklyStats']);
+    Route::get('/admin/jobs/monthly-stats', [QhJobController::class, 'monthlyStats']);
+    Route::get('/admin/jobs/yearly-stats', [QhJobController::class, 'yearlyStats']);
 
     // Admin application routes
     Route::get('/admin/applications', [ApplicationController::class, 'index']);

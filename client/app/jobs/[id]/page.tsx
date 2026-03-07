@@ -30,6 +30,7 @@ export default function JobDetailPage() {
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
   useEffect(() => {
     loadJobDetails();
@@ -112,6 +113,7 @@ export default function JobDetailPage() {
       });
 
       setSubmitted(true);
+      setNotification({ type: 'success', message: 'Application submitted successfully' });
       setFormData({
         name: '',
         email: '',
@@ -124,7 +126,9 @@ export default function JobDetailPage() {
       if (error.errors) {
         setFormErrors(error.errors);
       } else {
-        setFormErrors({ email: error.message || 'Application failed. Please try again.' });
+        const msg = error.message || 'Application failed. Please try again.';
+        setFormErrors({ email: msg });
+        setNotification({ type: 'error', message: msg });
       }
     } finally {
       setIsSubmitting(false);
@@ -175,6 +179,46 @@ export default function JobDetailPage() {
         
 
         <div className="container-custom py-12 pt-20">
+          {notification && (
+            <div
+              className={`mb-6 rounded-lg border p-4 flex items-start gap-3 ${
+                notification.type === 'success'
+                  ? 'border-green-200 bg-green-50'
+                  : 'border-red-200 bg-red-50'
+              }`}
+            >
+              <div className="mt-0.5">
+                {notification.type === 'success' ? (
+                  <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                ) : (
+                  <svg className="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                )}
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-semibold" style={{ color: '#25324B' }}>
+                  {notification.message}
+                </p>
+                {notification.type === 'error' && notification.message.includes('already applied') && (
+                  <p className="text-xs mt-1" style={{ color: '#7C8493' }}>
+                    It looks like you’ve already sent an application for this role using this email.
+                  </p>
+                )}
+              </div>
+              <button
+                className="p-1 rounded hover:bg-white/60"
+                aria-label="Dismiss notification"
+                onClick={() => setNotification(null)}
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: '#7C8493' }}>
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          )}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             
             {/* Main Content */}
@@ -183,14 +227,23 @@ export default function JobDetailPage() {
               {/* Job Header */}
               <div className="border border-gray-100 p-8">
                 <div className="flex items-start gap-6 mb-6">
-                  <div className="w-20 h-20 relative flex-shrink-0 bg-gray-100 rounded-lg flex items-center justify-center">
+                  <div className="w-20 h-20 relative flex-shrink-0 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden">
                     {job.logo ? (
-                      <Image
-                        src={job.logo}
-                        alt={`${job.company} logo`}
-                        fill
-                        className="object-contain"
-                      />
+                      job.logo.toLowerCase().endsWith('.svg') ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={job.logo}
+                          alt={`${job.company} logo`}
+                          className="object-contain w-20 h-20"
+                        />
+                      ) : (
+                        <Image
+                          src={job.logo}
+                          alt={`${job.company} logo`}
+                          fill
+                          className="object-contain"
+                        />
+                      )
                     ) : (
                       <span className="text-2xl font-bold" style={{ color: '#4640DE' }}>
                         {job.company.charAt(0)}

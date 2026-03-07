@@ -4,10 +4,12 @@ import { useState, useEffect } from 'react';
 import Logo from './Logo';
 import Button from '@/components/ui/Button';
 import Link from 'next/link';
+import { isAuthenticated, getUser, logout } from '@/lib/auth';
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [user, setUser] = useState<any>(null);
 
   // change header background when user scrolls down
   useEffect(() => {
@@ -16,6 +18,14 @@ export default function Header() {
     };
     window.addEventListener('scroll', onScroll);
     return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  useEffect(() => {
+    if (isAuthenticated()) {
+      setUser(getUser());
+    } else {
+      setUser(null);
+    }
   }, []);
 
   return (
@@ -49,12 +59,26 @@ export default function Header() {
 
           {/* Desktop Auth Buttons */}
           <div className="hidden md:flex items-center gap-3">
-            <Button variant="ghost" size="sm">
-              <Link href="/login">Login</Link>
-            </Button>
-            <Button variant="primary" size="sm">
-              <Link href="/signup">Sign Up</Link>
-            </Button>
+            {user ? (
+              user.is_admin ? (
+                <Button variant="primary" size="sm">
+                  <Link href="/admin">Dashboard</Link>
+                </Button>
+              ) : (
+                <Button variant="outline" size="sm" onClick={logout}>
+                  Logout
+                </Button>
+              )
+            ) : (
+              <>
+                <Button variant="ghost" size="sm">
+                  <Link href="/login">Login</Link>
+                </Button>
+                <Button variant="primary" size="sm">
+                  <Link href="/signup">Sign Up</Link>
+                </Button>
+              </>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -144,12 +168,26 @@ export default function Header() {
               </Link>
 
               <div className="flex flex-col gap-3 pt-4 border-t border-gray-100">
-                <Button variant="ghost" size="md" fullWidth>
-                  Login
-                </Button>
-                <Button variant="primary" size="md" fullWidth>
-                  Sign Up
-                </Button>
+                {user ? (
+                  user.is_admin ? (
+                    <Button variant="primary" size="md" fullWidth onClick={() => setMobileMenuOpen(false)}>
+                      <Link href="/admin">Dashboard</Link>
+                    </Button>
+                  ) : (
+                    <Button variant="outline" size="md" fullWidth onClick={() => { setMobileMenuOpen(false); logout(); }}>
+                      Logout
+                    </Button>
+                  )
+                ) : (
+                  <>
+                    <Button variant="ghost" size="md" fullWidth onClick={() => setMobileMenuOpen(false)}>
+                      <Link href="/login">Login</Link>
+                    </Button>
+                    <Button variant="primary" size="md" fullWidth onClick={() => setMobileMenuOpen(false)}>
+                      <Link href="/signup">Sign Up</Link>
+                    </Button>
+                  </>
+                )}
               </div>
             </div>
           </div>

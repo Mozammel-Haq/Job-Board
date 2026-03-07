@@ -19,7 +19,7 @@ export interface Job {
 
 export interface Application {
   id: number;
-  job_id: number;
+  qhjob_id: number;
   job?: Job;
   name: string;
   email: string;

@@ -3,9 +3,10 @@ import Link from 'next/link';
 
 type LogoProps = {
   variant?: 'default' | 'alt'; // choose which logo to show
+  collapsed?: boolean;
 };
 
-export default function Logo({ variant = 'default' }: LogoProps) {
+export default function Logo({ variant = 'default', collapsed = false }: LogoProps) {
   // Define logo sources based on variant
   const logos = {
     default: '/images/logo.svg',
@@ -20,15 +21,21 @@ export default function Logo({ variant = 'default' }: LogoProps) {
   return (
     <Link
       href="/"
-      className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+      className={`flex items-center gap-2 hover:opacity-80 transition-opacity ${collapsed ? 'justify-center' : ''}`}
     >
-      <Image
-        src={logos[variant]}
-        alt={altTexts[variant]}
-        width={32}
-        height={32}
-        className="min-w-[152px]"
-      />
+      <div className={`relative ${collapsed ? 'w-7 h-10 overflow-hidden' : 'w-[152px] h-8'}`}>
+        <Image
+          src={logos[variant]}
+          alt={altTexts[variant]}
+          width={152}
+          height={32}
+          className={`transition-all duration-300 ${collapsed ? 'max-w-none -translate-x-1' : ''}`}
+          style={{ 
+            objectFit: 'contain',
+            objectPosition: 'left'
+          }}
+        />
+      </div>
     </Link>
   );
 }

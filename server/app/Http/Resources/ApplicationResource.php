@@ -16,7 +16,7 @@ class ApplicationResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'job_id' => $this->job_id,
+            'qhjob_id' => $this->qhjob_id,
             'job' => new QhJobResource($this->whenLoaded('job')),
             'name' => $this->name,
             'email' => $this->email,

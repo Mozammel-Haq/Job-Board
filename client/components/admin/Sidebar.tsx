@@ -3,6 +3,8 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import Logo from '@/components/layout/Logo';
+import { useAdmin } from '@/lib/AdminContext';
+import { logout } from '@/lib/auth';
 
 const menuItems = [
   { 
@@ -82,58 +84,113 @@ const settingsItems = [
     label: 'Help Center',
     href: '/admin/help',
   },
+  {
+    icon: (
+      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 11-6 0v-1m6 0H9" />
+      </svg>
+    ),
+    label: 'Logout',
+    action: 'logout',
+  },
 ];
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const { isSidebarCollapsed, isMobileMenuOpen, toggleMobileMenu } = useAdmin();
+
+  const sidebarClasses = `
+    fixed inset-y-0 left-0 z-50 transform bg-white border-r border-gray-100 flex flex-col transition-all duration-300
+    ${isSidebarCollapsed ? 'w-20' : 'w-64'}
+    ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
+    md:relative md:z-auto
+  `;
 
   return (
-    <aside className="w-64 min-h-screen bg-white border-r border-gray-100 flex flex-col">
-      {/* Logo */}
-      <div className="p-6 border-b border-gray-100">
-        <Logo />
-      </div>
+    <>
+      {/* Mobile Overlay */}
+      {isMobileMenuOpen && (
+        <div 
+          className="fixed inset-0 bg-black/20 z-40 md:hidden backdrop-blur-sm"
+          onClick={toggleMobileMenu}
+        />
+      )}
 
-      {/* Main Navigation */}
-      <nav className="flex-1 py-6">
-        <div className="px-3 space-y-1">
-          {menuItems.map((item) => {
-            const isActive = pathname === item.href;
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`flex items-center gap-3 px-3 py-3 rounded-lg transition-all group relative ${
-                  isActive
-                    ? 'bg-background-secondary text-primary'
-                    : 'text-body hover:bg-background-secondary hover:text-primary'
-                }`}
-              >
-                <span className={isActive ? 'text-primary' : 'text-body group-hover:text-primary'}>
-                  {item.icon}
-                </span>
-                <span className="font-medium">{item.label}</span>
-                {item.badge && (
-                  <span 
-                    className="ml-auto w-6 h-6 flex items-center justify-center rounded-full text-xs font-bold text-white"
-                    style={{ backgroundColor: '#4640DE' }}
-                  >
-                    {item.badge}
-                  </span>
-                )}
-              </Link>
-            );
-          })}
+      <aside className={sidebarClasses}>
+        {/* Logo */}
+        <div className={`p-6 border-b border-gray-100 flex items-center ${isSidebarCollapsed ? 'justify-center' : ''}`}>
+          <Logo collapsed={isSidebarCollapsed} />
         </div>
 
-        {/* Settings Section */}
-        <div className="mt-8 px-3">
-          <p className="px-3 mb-3 text-xs font-semibold uppercase tracking-wider" style={{ color: '#7C8493' }}>
-            Settings
-          </p>
-          <div className="space-y-1">
-            {settingsItems.map((item) => {
+        {/* Main Navigation */}
+        <nav className="flex-1 py-6 overflow-y-auto no-scrollbar">
+          <div className="px-3 space-y-1">
+            {menuItems.map((item) => {
               const isActive = pathname === item.href;
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`flex items-center gap-3 px-3 py-3 rounded-lg transition-all group relative ${
+                    isActive
+                      ? 'bg-background-secondary text-primary'
+                      : 'text-body hover:bg-background-secondary hover:text-primary'
+                  }`}
+                  onClick={() => {
+                    if (window.innerWidth < 768) toggleMobileMenu();
+                  }}
+                  title={isSidebarCollapsed ? item.label : ''}
+                >
+                  <span className={isActive ? 'text-primary' : 'text-body group-hover:text-primary'}>
+                    {item.icon}
+                  </span>
+                  {!isSidebarCollapsed && (
+                    <span className="font-medium truncate whitespace-nowrap">{item.label}</span>
+                  )}
+                  {item.badge && !isSidebarCollapsed && (
+                    <span 
+                      className="ml-auto w-6 h-6 flex items-center justify-center rounded-full text-xs font-bold text-white"
+                      style={{ backgroundColor: '#4640DE' }}
+                    >
+                      {item.badge}
+                    </span>
+                  )}
+                  {item.badge && isSidebarCollapsed && (
+                    <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full"></span>
+                  )}
+                </Link>
+              );
+            })}
+          </div>
+
+          {/* Settings Section */}
+          <div className={`mt-8 px-3 ${isSidebarCollapsed ? 'text-center' : ''}`}>
+            <p 
+              className={`px-3 mb-3 text-xs font-semibold uppercase tracking-wider ${isSidebarCollapsed ? 'hidden' : ''}`} 
+              style={{ color: '#7C8493' }}
+            >
+              Settings
+            </p>
+            <div className="space-y-1">
+              {settingsItems.map((item) => {
+                const isActive = pathname === item.href;
+              if ((item as any).action === 'logout') {
+                return (
+                  <button
+                    key="logout"
+                    onClick={() => logout()}
+                    className="w-full mt-8 cursor-pointer flex items-center gap-3 px-3 py-3 rounded-lg transition-all group text-primary hover:bg-background-secondary hover:text-red-500"
+                    title={isSidebarCollapsed ? item.label : ''}
+                  >
+                    <span className="text-primary group-hover:text-red-500">
+                      {item.icon}
+                    </span>
+                    {!isSidebarCollapsed && (
+                      <span className="font-medium truncate whitespace-nowrap">{item.label}</span>
+                    )}
+                  </button>
+                );
+              }
               return (
                 <Link
                   key={item.href}
@@ -143,17 +200,24 @@ export default function Sidebar() {
                       ? 'bg-background-secondary text-primary'
                       : 'text-body hover:bg-background-secondary hover:text-primary'
                   }`}
+                  onClick={() => {
+                    if (window.innerWidth < 768) toggleMobileMenu();
+                  }}
+                  title={isSidebarCollapsed ? item.label : ''}
                 >
                   <span className={isActive ? 'text-primary' : 'text-body group-hover:text-primary'}>
                     {item.icon}
                   </span>
-                  <span className="font-medium">{item.label}</span>
+                  {!isSidebarCollapsed && (
+                    <span className="font-medium truncate whitespace-nowrap">{item.label}</span>
+                  )}
                 </Link>
               );
-            })}
+              })}
+            </div>
           </div>
-        </div>
-      </nav>
-    </aside>
+        </nav>
+      </aside>
+    </>
   );
 }

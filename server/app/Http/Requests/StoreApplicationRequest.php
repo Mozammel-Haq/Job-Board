@@ -22,7 +22,7 @@ class StoreApplicationRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'job_id' => ['required', 'exists:qhjobs,id'],
+            'qhjob_id' => ['required', 'exists:qhjobs,id'],
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255'],
             'resume_url' => ['required', 'url', 'max:500'],
@@ -32,8 +32,8 @@ class StoreApplicationRequest extends FormRequest
     public function messages()
     {
         return [
-            'job_id.required' => 'Job ID is required',
-            'job_id.exists' => 'The selected job does not exist',
+            'qhjob_id.required' => 'Job ID is required',
+            'qhjob_id.exists' => 'The selected job does not exist',
             'name.required' => 'Your name is required',
             'email.required' => 'Email address is required',
             'email.email' => 'Please provide a valid email address',

@@ -31,12 +31,21 @@ export default function JobCard({
         <div className="flex items-start justify-between mb-6">
           {/* Logo */}
           <div className="w-12 h-12 relative flex-shrink-0">
-            <Image
-              src={logo}
-              alt={`${company} logo`}
-              fill
-              className="object-contain"
-            />
+            {logo?.toLowerCase().endsWith('.svg') ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={logo}
+                alt={`${company} logo`}
+                className="object-contain w-12 h-12"
+              />
+            ) : (
+              <Image
+                src={logo}
+                alt={`${company} logo`}
+                fill
+                className="object-contain"
+              />
+            )}
           </div>
 
           {/* Employment Type Badge */}

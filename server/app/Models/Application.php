@@ -10,7 +10,7 @@ class Application extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'job_id',
+        'qhjob_id',
         'name',
         'email',
         'resume_url',
@@ -23,7 +23,7 @@ class Application extends Model
     ];
     public function job(): BelongsTo
     {
-        return $this->belongsTo(QhJob::class, 'job_id');
+        return $this->belongsTo(QhJob::class, 'qhjob_id');
     }
      /**
      * Scope a query to only include pending applications.
@@ -46,6 +46,6 @@ class Application extends Model
      */
     public function scopeForJob($query, $jobId)
     {
-        return $query->where('job_id', $jobId);
+        return $query->where('qhjob_id', $jobId);
     }
 }

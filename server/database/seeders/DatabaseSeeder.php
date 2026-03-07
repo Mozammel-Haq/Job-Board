@@ -7,6 +7,7 @@ use App\Models\QhJob;
 use App\Models\Application;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
+use Carbon\Carbon;
 
 class DatabaseSeeder extends Seeder
 {
@@ -19,7 +20,7 @@ class DatabaseSeeder extends Seeder
         $admin = User::create([
             'name' => 'Admin User',
             'email' => 'admin@gmail.com',
-            'password' => Hash::make('password'),
+            'password' => Hash::make('12345678'),
             'is_admin' => true,
         ]);
 
@@ -27,7 +28,7 @@ class DatabaseSeeder extends Seeder
         User::create([
             'name' => 'Normal User',
             'email' => 'user@gmail.com',
-            'password' => Hash::make('password'),
+            'password' => Hash::make('1234445678'),
             'is_admin' => false,
         ]);
 
@@ -216,16 +217,53 @@ class DatabaseSeeder extends Seeder
             QhJob::create($jobData);
         }
 
-        // Create sample applications
-        $job = QhJob::firstOrFail();
-        Application::create([
-            'qhjob_id' => $job->id,
-            'name' => 'Mozammel Haq',
-            'email' => 'hmojammel29@gmail.com',
-            'resume_url' => 'https://drive.google.com/file/d/sample-resume',
-            'cover_note' => 'I am very excited about this opportunity and believe my skills in frontend development make me a great fit for this role. I have 6 years of experience with React and have led several successful projects.',
-            'status' => 'pending',
-        ]);
+        // Additional random jobs to test pagination
+        $categories = ['Technology', 'Design', 'Marketing', 'Business', 'Management'];
+        $types = ['Full Time', 'Part Time', 'Remote', 'Contract', 'Internship'];
+        $locations = ['San Francisco, USA', 'New York, USA', 'Seattle, USA', 'London, UK', 'Remote'];
+        for ($j = 0; $j < 20; $j++) {
+            QhJob::create([
+                'title' => 'Job ' . ($j + 1),
+                'company' => ['Google', 'Amazon', 'Meta', 'Apple', 'Netflix'][array_rand(['Google', 'Amazon', 'Meta', 'Apple', 'Netflix'])],
+                'location' => $locations[array_rand($locations)],
+                'category' => $categories[array_rand($categories)],
+                'employment_type' => $types[array_rand($types)],
+                'salary' => rand(60, 180) . 'k/year',
+                'description' => 'This is a generated job used for testing pagination and charts.',
+                'responsibilities' => ['Responsibility A', 'Responsibility B', 'Responsibility C'],
+                'requirements' => ['Requirement A', 'Requirement B', 'Requirement C'],
+                'benefits' => ['Benefit A', 'Benefit B', 'Benefit C'],
+                'logo' => null,
+                'is_active' => (bool)rand(0, 1),
+            ]);
+        }
+        // Seed applications across multiple days and jobs for charts/pagination
+        $jobsAll = QhJob::all();
+        $start = Carbon::now()->subDays(20)->startOfDay();
+        $statuses = ['pending', 'reviewed', 'accepted', 'rejected'];
+        $domains = ['example.com', 'mail.com', 'inbox.com'];
+
+        foreach ($jobsAll as $jobIter) {
+            for ($d = 0; $d < 21; $d++) {
+                $day = (clone $start)->addDays($d)->setTime(rand(8, 20), rand(0, 59));
+                $countForDay = rand(0, 5); // 0-5 applications per job per day
+                for ($i = 0; $i < $countForDay; $i++) {
+                    $name = 'Candidate ' . ($d * 10 + $i);
+                    $email = 'candidate' . $jobIter->id . '_' . $d . '_' . $i . '@' . $domains[array_rand($domains)];
+                    $status = $statuses[array_rand($statuses)];
+                    Application::create([
+                        'qhjob_id' => $jobIter->id,
+                        'name' => $name,
+                        'email' => $email,
+                        'resume_url' => 'https://example.com/resumes/' . $jobIter->id . '/' . $d . '/' . $i,
+                        'cover_note' => 'Cover letter for ' . $name . ' applying to ' . $jobIter->title . '. I am a strong fit and excited to contribute.',
+                        'status' => $status,
+                        'created_at' => $day,
+                        'updated_at' => $day,
+                    ]);
+                }
+            }
+        }
 
         $this->command->info('Database seeded successfully!');
     }
