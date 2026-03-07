@@ -15,7 +15,7 @@ export default function JobDetailPage() {
   const params = useParams();
   const router = useRouter();
   const jobId = params.id as string;
-  
+
   const [job, setJob] = useState<Job | null>(null);
   const [loading, setLoading] = useState(true);
   const [relatedJobs, setRelatedJobs] = useState<Job[]>([]);
@@ -40,7 +40,7 @@ export default function JobDetailPage() {
   const loadJobDetails = async () => {
     try {
       const response = await api.getJob(jobId);
-      setJob(response.data);
+      setJob(response.data || null);
     } catch (error) {
       console.error('Failed to load job:', error);
     } finally {
@@ -51,7 +51,7 @@ export default function JobDetailPage() {
   const loadRelatedJobs = async () => {
     try {
       const response = await api.getLatestJobs();
-      setRelatedJobs(response.data.slice(0, 3));
+      setRelatedJobs(response.data?.slice(0, 3) || []);
     } catch (error) {
       console.error('Failed to load related jobs:', error);
     }
@@ -122,7 +122,7 @@ export default function JobDetailPage() {
       });
     } catch (error: any) {
       console.error('Application error:', error);
-      
+
       if (error.errors) {
         setFormErrors(error.errors);
       } else {
@@ -176,16 +176,15 @@ export default function JobDetailPage() {
     <>
       <Header />
       <main className="min-h-screen bg-white">
-        
+
 
         <div className="container-custom py-12 pt-20">
           {notification && (
             <div
-              className={`mb-6 rounded-lg border p-4 flex items-start gap-3 ${
-                notification.type === 'success'
+              className={`mb-6 rounded-lg border p-4 flex items-start gap-3 ${notification.type === 'success'
                   ? 'border-green-200 bg-green-50'
                   : 'border-red-200 bg-red-50'
-              }`}
+                }`}
             >
               <div className="mt-0.5">
                 {notification.type === 'success' ? (
@@ -220,10 +219,10 @@ export default function JobDetailPage() {
             </div>
           )}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            
+
             {/* Main Content */}
             <div className="lg:col-span-2 space-y-8">
-              
+
               {/* Job Header */}
               <div className="border border-gray-100 p-8">
                 <div className="flex items-start gap-6 mb-6">
@@ -250,18 +249,18 @@ export default function JobDetailPage() {
                       </span>
                     )}
                   </div>
-                  
+
                   <div className="flex-1">
-                    <h1 
+                    <h1
                       className="text-4xl font-bold mb-3"
-                      style={{ 
+                      style={{
                         color: '#25324B',
                         fontFamily: 'var(--font-family-display)'
                       }}
                     >
                       {job.title}
                     </h1>
-                    
+
                     <div className="flex flex-wrap items-center gap-4 mb-4">
                       <p className="text-lg" style={{ color: '#515B6F' }}>
                         {job.company}
@@ -310,9 +309,9 @@ export default function JobDetailPage() {
 
               {/* Job Description */}
               <div>
-                <h2 
+                <h2
                   className="text-2xl font-bold mb-4"
-                  style={{ 
+                  style={{
                     color: '#25324B',
                     fontFamily: 'var(--font-family-display)'
                   }}
@@ -327,9 +326,9 @@ export default function JobDetailPage() {
               {/* Responsibilities */}
               {job.responsibilities && job.responsibilities.length > 0 && (
                 <div>
-                  <h2 
+                  <h2
                     className="text-2xl font-bold mb-4"
-                    style={{ 
+                    style={{
                       color: '#25324B',
                       fontFamily: 'var(--font-family-display)'
                     }}
@@ -352,9 +351,9 @@ export default function JobDetailPage() {
               {/* Requirements */}
               {job.requirements && job.requirements.length > 0 && (
                 <div>
-                  <h2 
+                  <h2
                     className="text-2xl font-bold mb-4"
-                    style={{ 
+                    style={{
                       color: '#25324B',
                       fontFamily: 'var(--font-family-display)'
                     }}
@@ -377,9 +376,9 @@ export default function JobDetailPage() {
               {/* Benefits */}
               {job.benefits && job.benefits.length > 0 && (
                 <div>
-                  <h2 
+                  <h2
                     className="text-2xl font-bold mb-4"
-                    style={{ 
+                    style={{
                       color: '#25324B',
                       fontFamily: 'var(--font-family-display)'
                     }}
@@ -401,9 +400,9 @@ export default function JobDetailPage() {
 
               {/* Application Form */}
               <div className="border border-gray-100 p-8" id="apply-form">
-                <h2 
+                <h2
                   className="text-3xl font-bold mb-6"
-                  style={{ 
+                  style={{
                     color: '#25324B',
                     fontFamily: 'var(--font-family-display)'
                   }}
@@ -494,7 +493,7 @@ export default function JobDetailPage() {
             {/* Sidebar */}
             <div className="lg:col-span-1">
               <div className="sticky top-24 space-y-6">
-                
+
                 {/* Quick Apply CTA */}
                 <div className="border border-gray-100 p-6 text-center">
                   <h3 className="text-xl font-bold mb-4" style={{ color: '#25324B' }}>

@@ -15,14 +15,16 @@ const categories = ['All', 'Design', 'Technology', 'Marketing', 'Business', 'Fin
 const jobTypes = ['All', 'Full Time', 'Part Time', 'Remote', 'Contract', 'Internship'];
 const locations = ['All', 'USA', 'UK', 'Europe', 'Remote'];
 
-export default function JobsPage() {
+import { Suspense } from 'react';
+
+function JobsPageContent() {
   const searchParams = useSearchParams();
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
   const [totalJobs, setTotalJobs] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  
+
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedJobType, setSelectedJobType] = useState('All');
@@ -66,29 +68,29 @@ export default function JobsPage() {
     <>
       <Header />
       <main className="min-h-screen bg-white">
-        
+
         {/* Page Header */}
         <div className="bg-background-secondary py-12">
           <div className="container-custom relative">
-             <div className="absolute right-0 lg:top-0 md:top-20 top-80 w-[45%] h-full">
-                    <Image
-                      src="/images/Pattern.svg"
-                      alt=""
-                      fill
-                      className="object-cover object-center"
-                      priority
-                    />
-                  </div>
-            <h1 
+            <div className="absolute right-0 lg:top-0 md:top-20 top-80 w-[45%] h-full">
+              <Image
+                src="/images/Pattern.svg"
+                alt=""
+                fill
+                className="object-cover object-center"
+                priority
+              />
+            </div>
+            <h1
               className="text-5xl font-bold mb-4 mt-20"
-              style={{ 
+              style={{
                 color: '#25324B',
                 fontFamily: 'var(--font-family-display)'
               }}
             >
               Find Your <span className="text-primary">Dream</span> Job
             </h1>
-            
+
             <p className="text-lg" style={{ color: '#515B6F' }}>
               {loading ? 'Loading...' : `Showing ${totalJobs} jobs available`}
             </p>
@@ -97,13 +99,13 @@ export default function JobsPage() {
 
         <div className="container-custom py-12">
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-            
+
             {/* Sidebar Filters */}
             <aside className="lg:col-span-1">
               <div className="bg-white border border-gray-100 p-6 sticky top-24">
-                <h2 
+                <h2
                   className="text-xl font-bold mb-6"
-                  style={{ 
+                  style={{
                     color: '#25324B',
                     fontFamily: 'var(--font-family-display)'
                   }}
@@ -144,7 +146,7 @@ export default function JobsPage() {
                           onChange={() => setSelectedCategory(category)}
                           className="w-4 h-4 accent-primary cursor-pointer"
                         />
-                        <span 
+                        <span
                           className="ml-3 text-base group-hover:text-primary transition-colors"
                           style={{ color: selectedCategory === category ? '#4640DE' : '#515B6F' }}
                         >
@@ -170,7 +172,7 @@ export default function JobsPage() {
                           onChange={() => setSelectedJobType(type)}
                           className="w-4 h-4 accent-primary cursor-pointer"
                         />
-                        <span 
+                        <span
                           className="ml-3 text-base group-hover:text-primary transition-colors"
                           style={{ color: selectedJobType === type ? '#4640DE' : '#515B6F' }}
                         >
@@ -196,7 +198,7 @@ export default function JobsPage() {
                           onChange={() => setSelectedLocation(location)}
                           className="w-4 h-4 accent-primary cursor-pointer"
                         />
-                        <span 
+                        <span
                           className="ml-3 text-base group-hover:text-primary transition-colors"
                           style={{ color: selectedLocation === location ? '#4640DE' : '#515B6F' }}
                         >
@@ -249,7 +251,7 @@ export default function JobsPage() {
                   {totalPages > 1 && (
                     <div className="mt-12 flex justify-center">
                       <div className="flex items-center gap-2">
-                        <button 
+                        <button
                           onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                           disabled={currentPage === 1}
                           className="px-4 py-2 border border-gray-200 hover:border-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
@@ -274,7 +276,7 @@ export default function JobsPage() {
                             </button>
                           );
                         })}
-                        <button 
+                        <button
                           onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                           disabled={currentPage === totalPages}
                           className="px-4 py-2 border border-gray-200 hover:border-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
@@ -288,9 +290,9 @@ export default function JobsPage() {
                 </>
               ) : (
                 <div className="text-center py-20">
-                  <h3 
+                  <h3
                     className="text-2xl font-bold mb-4"
-                    style={{ 
+                    style={{
                       color: '#25324B',
                       fontFamily: 'var(--font-family-display)'
                     }}
@@ -311,5 +313,20 @@ export default function JobsPage() {
       </main>
       <Footer />
     </>
+  );
+}
+
+export default function JobsPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p style={{ color: '#515B6F' }}>Loading jobs...</p>
+        </div>
+      </div>
+    }>
+      <JobsPageContent />
+    </Suspense>
   );
 }

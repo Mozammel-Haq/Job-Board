@@ -1,5 +1,5 @@
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
-import type { Application } from '@/lib/types';
+import type { Application, PaginatedResponse, Job, User } from '@/lib/types';
 
 interface ApiResponse<T = any> {
   data?: T;
@@ -18,7 +18,7 @@ class ApiService {
     options: RequestInit = {}
   ): Promise<ApiResponse<T>> {
     const token = this.getAuthToken();
-    
+
     const headers: HeadersInit = {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
@@ -49,18 +49,18 @@ class ApiService {
   }
 
   // Auth endpoints
-  async register(data: { name: string; email: string; password: string; password_confirmation: string }) {
+  async register(data: { name: string; email: string; password: string; password_confirmation: string }): Promise<any> {
     return this.request('/register', {
       method: 'POST',
       body: JSON.stringify(data),
     });
   }
 
-  async login(data: { email: string; password: string }) {
-    return this.request('/login', {
+  async login(data: { email: string; password: string }): Promise<{ token: string; user: User }> {
+    return this.request<any>('/login', {
       method: 'POST',
       body: JSON.stringify(data),
-    });
+    }) as unknown as Promise<{ token: string; user: User }>;
   }
 
   async logout() {
@@ -87,20 +87,20 @@ class ApiService {
         .filter(([_, v]) => v !== undefined && v !== null && v !== '')
         .map(([k, v]) => [k, String(v)])
     ).toString() : '';
-    
-    return this.request(`/jobs${queryString}`);
+
+    return this.request<Job[]>(`/jobs${queryString}`) as unknown as Promise<PaginatedResponse<Job>>;
   }
 
   async getJob(id: string) {
-    return this.request(`/jobs/${id}`);
+    return this.request<Job>(`/jobs/${id}`);
   }
 
   async getFeaturedJobs() {
-    return this.request('/jobs/featured');
+    return this.request<Job[]>('/jobs/featured');
   }
 
   async getLatestJobs() {
-    return this.request('/jobs/latest');
+    return this.request<Job[]>('/jobs/latest');
   }
 
   async createJob(data: any) {
@@ -134,22 +134,22 @@ class ApiService {
         .filter(([_, v]) => v !== undefined && v !== null && v !== '')
         .map(([k, v]) => [k, String(v)])
     ).toString() : '';
-    
-    return this.request(`/admin/jobs${queryString}`);
+
+    return this.request<Job[]>(`/admin/jobs${queryString}`) as unknown as Promise<PaginatedResponse<Job>>;
   }
 
   async getJobStatistics() {
-    return this.request('/admin/jobs/statistics');
+    return this.request<any>('/admin/jobs/statistics');
   }
 
   async getWeeklyStats() {
-    return this.request('/admin/jobs/weekly-stats');
+    return this.request<any[]>('/admin/jobs/weekly-stats');
   }
   async getMonthlyStats() {
-    return this.request('/admin/jobs/monthly-stats');
+    return this.request<any[]>('/admin/jobs/monthly-stats');
   }
   async getYearlyStats() {
-    return this.request('/admin/jobs/yearly-stats');
+    return this.request<any[]>('/admin/jobs/yearly-stats');
   }
   async uploadJobLogo(file: File) {
     const token = this.getAuthToken();
@@ -207,8 +207,8 @@ class ApiService {
         .filter(([_, v]) => v !== undefined && v !== null && v !== '')
         .map(([k, v]) => [k, String(v)])
     ).toString() : '';
-    
-    return this.request<{ data: Application[]; meta?: any; links?: any }>(`/admin/applications${queryString}`);
+
+    return this.request<Application[]>(`/admin/applications${queryString}`) as unknown as Promise<PaginatedResponse<Application>>;
   }
 
   async updateApplicationStatus(id: number, status: string) {

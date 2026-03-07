@@ -7,7 +7,7 @@ import { useAdmin } from '@/lib/AdminContext';
 import { logout } from '@/lib/auth';
 
 const menuItems = [
-  { 
+  {
     icon: (
       <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
@@ -110,7 +110,7 @@ export default function Sidebar() {
     <>
       {/* Mobile Overlay */}
       {isMobileMenuOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/20 z-40 md:hidden backdrop-blur-sm"
           onClick={toggleMobileMenu}
         />
@@ -131,11 +131,10 @@ export default function Sidebar() {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`flex items-center gap-3 px-3 py-3 rounded-lg transition-all group relative ${
-                    isActive
+                  className={`flex items-center gap-3 px-3 py-3 rounded-lg transition-all group relative ${isActive
                       ? 'bg-background-secondary text-primary'
                       : 'text-body hover:bg-background-secondary hover:text-primary'
-                  }`}
+                    }`}
                   onClick={() => {
                     if (window.innerWidth < 768) toggleMobileMenu();
                   }}
@@ -148,7 +147,7 @@ export default function Sidebar() {
                     <span className="font-medium truncate whitespace-nowrap">{item.label}</span>
                   )}
                   {item.badge && !isSidebarCollapsed && (
-                    <span 
+                    <span
                       className="ml-auto w-6 h-6 flex items-center justify-center rounded-full text-xs font-bold text-white"
                       style={{ backgroundColor: '#4640DE' }}
                     >
@@ -165,8 +164,8 @@ export default function Sidebar() {
 
           {/* Settings Section */}
           <div className={`mt-8 px-3 ${isSidebarCollapsed ? 'text-center' : ''}`}>
-            <p 
-              className={`px-3 mb-3 text-xs font-semibold uppercase tracking-wider ${isSidebarCollapsed ? 'hidden' : ''}`} 
+            <p
+              className={`px-3 mb-3 text-xs font-semibold uppercase tracking-wider ${isSidebarCollapsed ? 'hidden' : ''}`}
               style={{ color: '#7C8493' }}
             >
               Settings
@@ -174,45 +173,44 @@ export default function Sidebar() {
             <div className="space-y-1">
               {settingsItems.map((item) => {
                 const isActive = pathname === item.href;
-              if ((item as any).action === 'logout') {
+                if ((item as any).action === 'logout') {
+                  return (
+                    <button
+                      key="logout"
+                      onClick={() => logout()}
+                      className="w-full mt-8 cursor-pointer flex items-center gap-3 px-3 py-3 rounded-lg transition-all group text-primary hover:bg-background-secondary hover:text-red-500"
+                      title={isSidebarCollapsed ? item.label : ''}
+                    >
+                      <span className="text-primary group-hover:text-red-500">
+                        {item.icon}
+                      </span>
+                      {!isSidebarCollapsed && (
+                        <span className="font-medium truncate whitespace-nowrap">{item.label}</span>
+                      )}
+                    </button>
+                  );
+                }
                 return (
-                  <button
-                    key="logout"
-                    onClick={() => logout()}
-                    className="w-full mt-8 cursor-pointer flex items-center gap-3 px-3 py-3 rounded-lg transition-all group text-primary hover:bg-background-secondary hover:text-red-500"
+                  <Link
+                    key={item.href || item.label}
+                    href={item.href || '#'}
+                    className={`flex items-center gap-3 px-3 py-3 rounded-lg transition-all group ${isActive
+                        ? 'bg-background-secondary text-primary'
+                        : 'text-body hover:bg-background-secondary hover:text-primary'
+                      }`}
+                    onClick={() => {
+                      if (window.innerWidth < 768) toggleMobileMenu();
+                    }}
                     title={isSidebarCollapsed ? item.label : ''}
                   >
-                    <span className="text-primary group-hover:text-red-500">
+                    <span className={isActive ? 'text-primary' : 'text-body group-hover:text-primary'}>
                       {item.icon}
                     </span>
                     {!isSidebarCollapsed && (
                       <span className="font-medium truncate whitespace-nowrap">{item.label}</span>
                     )}
-                  </button>
+                  </Link>
                 );
-              }
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={`flex items-center gap-3 px-3 py-3 rounded-lg transition-all group ${
-                    isActive
-                      ? 'bg-background-secondary text-primary'
-                      : 'text-body hover:bg-background-secondary hover:text-primary'
-                  }`}
-                  onClick={() => {
-                    if (window.innerWidth < 768) toggleMobileMenu();
-                  }}
-                  title={isSidebarCollapsed ? item.label : ''}
-                >
-                  <span className={isActive ? 'text-primary' : 'text-body group-hover:text-primary'}>
-                    {item.icon}
-                  </span>
-                  {!isSidebarCollapsed && (
-                    <span className="font-medium truncate whitespace-nowrap">{item.label}</span>
-                  )}
-                </Link>
-              );
               })}
             </div>
           </div>

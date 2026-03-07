@@ -52,6 +52,11 @@ export default function JobForm({ id }: { id?: string }) {
     try {
       const response = await api.getJob(jobId);
       const job = response.data;
+      if (!job) {
+        alert('Job not found');
+        router.push('/admin/jobs');
+        return;
+      }
       setFormData({
         title: job.title,
         company: job.company,
