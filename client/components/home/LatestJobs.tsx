@@ -1,111 +1,54 @@
-import JobListItem from '@/components/jobs/JobListItem';
-import Image from 'next/image';
-import Link from 'next/link';
+'use client';
 
-const latestJobs = [
-  {
-    id: '9',
-    title: 'Social Media Assistant',
-    company: 'Nomad',
-    location: 'Paris, France',
-    logo: '/images/companies/nomad.svg',
-    employmentType: 'Full-Time',
-    categories: ['Marketing', 'Design'],
-  },
-  {
-    id: '10',
-    title: 'Social Media Assistant',
-    company: 'Netlify',
-    location: 'Paris, France',
-    logo: '/images/companies/netlify.svg',
-    employmentType: 'Full-Time',
-    categories: ['Marketing', 'Design'],
-  },
-  {
-    id: '11',
-    title: 'Brand Designer',
-    company: 'Dropbox',
-    location: 'San Fransisco, USA',
-    logo: '/images/companies/dropbox.svg',
-    employmentType: 'Full-Time',
-    categories: ['Design'],
-  },
-  {
-    id: '12',
-    title: 'Brand Designer',
-    company: 'Maze',
-    location: 'San Fransisco, USA',
-    logo: '/images/companies/maze.svg',
-    employmentType: 'Full-Time',
-    categories: ['Marketing', 'Design'],
-  },
-  {
-    id: '13',
-    title: 'Interactive Developer',
-    company: 'Terraform',
-    location: 'Hamburg, Germany',
-    logo: '/images/companies/terraform.svg',
-    employmentType: 'Full-Time',
-    categories: ['Marketing', 'Design'],
-  },
-  {
-    id: '14',
-    title: 'Interactive Developer',
-    company: 'Udacity',
-    location: 'Hamburg, Germany',
-    logo: '/images/companies/udacity.svg',
-    employmentType: 'Full-Time',
-    categories: ['Marketing', 'Design'],
-  },
-  {
-    id: '15',
-    title: 'HR Manager',
-    company: 'Packer',
-    location: 'Lucern, Switzerland',
-    logo: '/images/companies/packer.svg',
-    employmentType: 'Full-Time',
-    categories: ['Marketing', 'Management'],
-  },
-  {
-    id: '16',
-    title: 'HR Manager',
-    company: 'Webflow',
-    location: 'Lucern, Switzerland',
-    logo: '/images/companies/webflow.svg',
-    employmentType: 'Full-Time',
-    categories: ['Marketing', 'Design'],
-  },
-];
+import { useEffect, useState } from 'react';
+import JobListItem from '@/components/jobs/JobListItem';
+import Link from 'next/link';
+import { api } from '@/lib/api';
+import { Job } from '@/lib/types';
 
 export default function LatestJobs() {
+  const [jobs, setJobs] = useState<Job[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadLatestJobs();
+  }, []);
+
+  const loadLatestJobs = async () => {
+    try {
+      const response = await api.getLatestJobs();
+      setJobs(response.data || []);
+    } catch (error) {
+      console.error('Failed to load latest jobs:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <section className="py-20 bg-background-secondary relative overflow-hidden">
+        <div className="container-custom text-center">
+          <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <p className="mt-4" style={{ color: '#515B6F' }}>Loading latest jobs...</p>
+        </div>
+      </section>
+    );
+  }
+
   return (
-    <section className="relative py-20 overflow-hidden bg-[#F8F8FD]">
-
-      {/* Pattern Background */}
-      <div className="absolute right-0 top-0 w-[60%] h-full pointer-events-none">
-        <Image
-          src="/images/Pattern.svg"
-          alt=""
-          fill
-          className="object-cover object-right opacity-40"
-        />
+    <section className="py-20 bg-background-secondary relative overflow-hidden">
+      {/* Background Pattern - Diagonal Lines */}
+      <div className="absolute inset-0 opacity-5">
+        <svg width="100%" height="100%">
+          <defs>
+            <pattern id="diagonal-lines" patternUnits="userSpaceOnUse" width="40" height="40" patternTransform="rotate(45)">
+              <line x1="0" y1="0" x2="0" y2="40" stroke="#25324B" strokeWidth="1"/>
+            </pattern>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#diagonal-lines)" />
+        </svg>
       </div>
-
-      {/* Top-Left Clip Shape */}
-      <div
-        className="absolute -top-18 -left-18 w-80 h-80 bg-white"
-        style={{
-          clipPath: 'polygon(0 0, 100% 0, 0 70%)'
-        }}
-      />
-
-      {/* Bottom-Right Clip Shape */}
-      <div
-        className="absolute -bottom-18 -right-18 w-96 h-96 bg-white"
-        style={{
-          clipPath: 'polygon(100% 30%, 100% 100%, 0 100%)'
-        }}
-      />
 
       <div className="container-custom relative z-10">
         
@@ -144,9 +87,18 @@ export default function LatestJobs() {
         </div>
 
         {/* Jobs Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          {latestJobs.map((job) => (
-            <JobListItem key={job.id} {...job} />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+          {jobs.map((job) => (
+            <JobListItem
+              key={job.id}
+              id={String(job.id)}
+              title={job.title}
+              company={job.company}
+              location={job.location}
+              logo={job.logo || '/images/companies/dropbox.svg'}
+              employmentType={job.employment_type}
+              categories={[job.category]}
+            />
           ))}
         </div>
 
@@ -173,7 +125,6 @@ export default function LatestJobs() {
             </svg>
           </Link>
         </div>
-
       </div>
     </section>
   );

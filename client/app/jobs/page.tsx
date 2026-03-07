@@ -9,6 +9,7 @@ import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
 import { api } from '@/lib/api';
 import { Job, PaginatedResponse } from '@/lib/types';
+import Image from 'next/image';
 
 const categories = ['All', 'Design', 'Technology', 'Marketing', 'Business', 'Finance'];
 const jobTypes = ['All', 'Full Time', 'Part Time', 'Remote', 'Contract', 'Internship'];
@@ -68,23 +69,24 @@ export default function JobsPage() {
         
         {/* Page Header */}
         <div className="bg-background-secondary py-12">
-          <div className="container-custom">
-            <div className="mb-6">
-              <p className="text-base mb-2" style={{ color: '#515B6F' }}>
-                <span className="hover:text-primary cursor-pointer">Home</span>
-                {' '}/{' '}
-                <span style={{ color: '#25324B' }}>Find Jobs</span>
-              </p>
-            </div>
-            
+          <div className="container-custom relative">
+             <div className="absolute right-0 lg:top-0 md:top-20 top-80 w-[45%] h-full">
+                    <Image
+                      src="/images/Pattern.svg"
+                      alt=""
+                      fill
+                      className="object-cover object-center"
+                      priority
+                    />
+                  </div>
             <h1 
-              className="text-5xl font-bold mb-4"
+              className="text-5xl font-bold mb-4 mt-20"
               style={{ 
                 color: '#25324B',
                 fontFamily: 'var(--font-family-display)'
               }}
             >
-              Find Your Dream Job
+              Find Your <span className="text-primary">Dream</span> Job
             </h1>
             
             <p className="text-lg" style={{ color: '#515B6F' }}>
