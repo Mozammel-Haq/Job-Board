@@ -105,6 +105,11 @@ class ApiService {
     return this.request<Job[]>('/jobs/latest');
   }
 
+  async getJobFilters(): Promise<{ categories: { name: string; count: number }[]; locations: string[]; employment_types: string[] }> {
+    const response = await this.request<{ categories: { name: string; count: number }[]; locations: string[]; employment_types: string[] }>('/jobs/filters');
+    return response.data!;
+  }
+
   async createJob(data: any) {
     return this.request('/admin/jobs', {
       method: 'POST',

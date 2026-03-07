@@ -307,4 +307,29 @@ class QhJobController extends Controller
             'data' => $months
         ]);
     }
+
+    public function getFilters()
+    {
+        $categories = QhJob::active()
+            ->select('category', \DB::raw('count(*) as count'))
+            ->groupBy('category')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'name' => $item->category,
+                    'count' => $item->count,
+                ];
+            });
+
+        $locations = QhJob::active()->distinct()->pluck('location')->filter()->values();
+        $employmentTypes = QhJob::active()->distinct()->pluck('employment_type')->filter()->values();
+
+        return response()->json([
+            'data' => [
+                'categories' => $categories,
+                'locations' => $locations,
+                'employment_types' => $employmentTypes,
+            ]
+        ]);
+    }
 }

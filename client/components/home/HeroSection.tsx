@@ -2,15 +2,24 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import Button from '@/components/ui/Button';
 
 export default function HeroSection() {
+  const router = useRouter();
   const [jobTitle, setJobTitle] = useState('');
-  const [location, setLocation] = useState('Florence, Italy');
+  const [location, setLocation] = useState('');
+
+  const handleSearch = () => {
+    const params = new URLSearchParams();
+    if (jobTitle) params.set('search', jobTitle);
+    if (location) params.set('location', location);
+    router.push(`/jobs?${params.toString()}`);
+  };
 
   return (
     <section className="relative lg:max-h-[calc(100vh-0.25rem)] overflow-hidden bg-[#F8F8FD] lg:pt-0 pt-10">
-      
+
       {/* Background Pattern - Extends further left */}
       <div className="absolute right-0 lg:top-0 md:top-20 top-80 w-[65%] h-full">
         <Image
@@ -21,18 +30,18 @@ export default function HeroSection() {
           priority
         />
       </div>
-      
+
       <div className="container-custom relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-14 items-center py-16 lg:py-24">
-          
+
           {/* Left Content */}
           <div className="space-y-8 relative z-20 lg:mb-10 w-full">
-            
+
             {/* Heading */}
             <div>
-              <h1 
+              <h1
                 className="font-display font-bold leading-tight mb-6"
-                style={{ 
+                style={{
                   fontSize: 'clamp(3rem, 5vw, 4.5rem)',
                   color: '#25324B',
                   lineHeight: '1.1'
@@ -54,7 +63,7 @@ export default function HeroSection() {
                 </span>
               </h1>
 
-              <p 
+              <p
                 className="text-lg leading-relaxed max-w-md mt-16"
                 style={{ color: '#515B6F' }}
               >
@@ -64,21 +73,21 @@ export default function HeroSection() {
 
             {/* Search Bar */}
             <div className="bg-white shadow-lg lg:shadow-lg p-2.5 flex flex-col sm:flex-row gap-4 items-stretch overflow-visible relative z-50 lg:absolute lg:top-[385px] lg:left-0 lg:w-[840px]">
-              
+
               {/* Job Title Input */}
               <div className="flex-1 flex items-center gap-3 px-4 py-3 mb-0">
-                <svg 
-                  className="w-5 h-5 flex-shrink-0" 
-                  fill="none" 
-                  stroke="currentColor" 
+                <svg
+                  className="w-5 h-5 flex-shrink-0"
+                  fill="none"
+                  stroke="currentColor"
                   viewBox="0 0 24 24"
                   style={{ color: '#515B6F' }}
                 >
-                  <path 
-                    strokeLinecap="round" 
-                    strokeLinejoin="round" 
-                    strokeWidth={2} 
-                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" 
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
                   />
                 </svg>
                 <input
@@ -93,24 +102,24 @@ export default function HeroSection() {
 
               {/* Location Input */}
               <div className="flex-1 flex items-center gap-3 p-4">
-                <svg 
-                  className="w-5 h-5 flex-shrink-0" 
-                  fill="none" 
-                  stroke="currentColor" 
+                <svg
+                  className="w-5 h-5 flex-shrink-0"
+                  fill="none"
+                  stroke="currentColor"
                   viewBox="0 0 24 24"
                   style={{ color: '#515B6F' }}
                 >
-                  <path 
-                    strokeLinecap="round" 
-                    strokeLinejoin="round" 
-                    strokeWidth={2} 
-                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" 
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
                   />
-                  <path 
-                    strokeLinecap="round" 
-                    strokeLinejoin="round" 
-                    strokeWidth={2} 
-                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" 
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
                   />
                 </svg>
                 <input
@@ -124,27 +133,36 @@ export default function HeroSection() {
               </div>
 
               {/* Search Button */}
-              <Button 
-  variant="primary" 
-  className="whitespace-nowrap px-8 w-full sm:w-auto self-center" 
-  size="md"
->
-  Search my job
-</Button>
+              <Button
+                variant="primary"
+                className="whitespace-nowrap px-8 w-full sm:w-auto self-center"
+                size="md"
+                onClick={handleSearch}
+              >
+                Search my job
+              </Button>
             </div>
 
-            {/* Popular Keywords */}
             <div className="flex flex-wrap items-center gap-3 mt-6 lg:mt-32">
               <span className="font-medium text-[var(--c-text-dark)]">
                 Popular :
               </span>
-              
-              <span
-                className="py-1 text-sm font-medium cursor-pointer text-[var(--c-text-dark)]"
-              
-              >
-                UI Designer, UX Researcher, Android, Admin
-              </span>
+
+              <div className="flex flex-wrap gap-2 text-sm font-medium text-[var(--c-text-dark)]">
+                {['UI Designer', 'UX Researcher', 'Android', 'Admin'].map((keyword, index, array) => (
+                  <button
+                    key={keyword}
+                    onClick={() => {
+                      const params = new URLSearchParams();
+                      params.set('search', keyword);
+                      router.push(`/jobs?${params.toString()}`);
+                    }}
+                    className="hover:text-primary transition-colors pr-1"
+                  >
+                    {keyword}{index < array.length - 1 ? ',' : ''}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
 
@@ -166,7 +184,7 @@ export default function HeroSection() {
                 bottom: '-62%',
                 left: '80%',
                 transform: 'rotate(64deg)',
-                zIndex: 5, 
+                zIndex: 5,
               }}
             ></div>
           </div>

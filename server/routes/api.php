@@ -14,6 +14,7 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::get('/jobs', [QhJobController::class, 'index']);
 Route::get('/jobs/featured', [QhJobController::class, 'featured']);
 Route::get('/jobs/latest', [QhJobController::class, 'latest']);
+Route::get('/jobs/filters', [QhJobController::class, 'getFilters']);
 Route::get('/jobs/{qhjob}', [QhJobController::class, 'show']);
 
 // Public application route

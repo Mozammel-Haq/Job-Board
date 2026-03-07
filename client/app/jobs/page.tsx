@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useState, useEffect, useRef } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import JobCard from '@/components/jobs/JobCard';
@@ -12,30 +12,74 @@ import { Job, PaginatedResponse } from '@/lib/types';
 import Image from 'next/image';
 import Pagination from '@/components/ui/Pagination';
 
-const categories = ['All', 'Design', 'Technology', 'Marketing', 'Business', 'Finance'];
-const jobTypes = ['All', 'Full Time', 'Part Time', 'Remote', 'Contract', 'Internship'];
-const locations = ['All', 'USA', 'UK', 'Europe', 'Remote'];
+const staticJobTypes = ['All', 'Full Time', 'Part Time', 'Remote', 'Contract', 'Internship'];
 
 import { Suspense } from 'react';
 
 function JobsPageContent() {
   const searchParams = useSearchParams();
+  const router = useRouter();
+  const lastRequestRef = useRef<number>(0);
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
   const [totalJobs, setTotalJobs] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('All');
+  const [categories, setCategories] = useState<string[]>(['All']);
+  const [locations, setLocations] = useState<string[]>(['All']);
+  const [jobTypes, setJobTypes] = useState<string[]>(staticJobTypes);
+
+  const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
+  const [selectedCategory, setSelectedCategory] = useState(searchParams.get('category') || 'All');
   const [selectedJobType, setSelectedJobType] = useState('All');
-  const [selectedLocation, setSelectedLocation] = useState('All');
+  const [selectedLocation, setSelectedLocation] = useState(searchParams.get('location') || 'All');
+  const [locationSearch, setLocationSearch] = useState('');
+  const [isLocationDropdownOpen, setIsLocationDropdownOpen] = useState(false);
+  const locationRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (locationRef.current && !locationRef.current.contains(event.target as Node)) {
+        setIsLocationDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    const fetchFilters = async () => {
+      try {
+        const filters = await api.getJobFilters();
+        setCategories(['All', ...filters.categories.map(c => c.name)]);
+        setLocations(['All', ...filters.locations]);
+        if (filters.employment_types.length > 0) {
+          setJobTypes(['All', ...filters.employment_types]);
+        }
+      } catch (error) {
+        console.error('Failed to fetch filters:', error);
+      }
+    };
+    fetchFilters();
+  }, []);
+
+  useEffect(() => {
+    const search = searchParams.get('search') || '';
+    const location = searchParams.get('location') || 'All';
+    const category = searchParams.get('category') || 'All';
+
+    setSearchTerm(search);
+    setSelectedLocation(location);
+    setSelectedCategory(category);
+  }, [searchParams]);
 
   useEffect(() => {
     loadJobs();
   }, [searchTerm, selectedCategory, selectedJobType, selectedLocation, currentPage]);
 
   const loadJobs = async () => {
+    const requestId = ++lastRequestRef.current;
     setLoading(true);
     try {
       const response: PaginatedResponse<Job> = await api.getJobs({
@@ -46,6 +90,8 @@ function JobsPageContent() {
         page: currentPage,
         per_page: 15,
       });
+
+      if (requestId !== lastRequestRef.current) return;
 
       setJobs(response.data);
       setTotalJobs(response.meta.total);
@@ -58,11 +104,7 @@ function JobsPageContent() {
   };
 
   const handleClearFilters = () => {
-    setSearchTerm('');
-    setSelectedCategory('All');
-    setSelectedJobType('All');
-    setSelectedLocation('All');
-    setCurrentPage(1);
+    router.push('/jobs');
   };
 
   return (
@@ -185,28 +227,64 @@ function JobsPageContent() {
                 </div>
 
                 {/* Location Filter */}
-                <div className="mb-6">
+                <div className="mb-6 relative" ref={locationRef}>
                   <label className="block text-sm font-semibold mb-3" style={{ color: '#25324B' }}>
                     Location
                   </label>
-                  <div className="space-y-2">
-                    {locations.map((location) => (
-                      <label key={location} className="flex items-center cursor-pointer group">
-                        <input
-                          type="radio"
-                          name="location"
-                          checked={selectedLocation === location}
-                          onChange={() => setSelectedLocation(location)}
-                          className="w-4 h-4 accent-primary cursor-pointer"
-                        />
-                        <span
-                          className="ml-3 text-base group-hover:text-primary transition-colors"
-                          style={{ color: selectedLocation === location ? '#4640DE' : '#515B6F' }}
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                    </div>
+                    <input
+                      type="text"
+                      placeholder="Search location..."
+                      value={isLocationDropdownOpen ? locationSearch : (selectedLocation === 'All' ? '' : selectedLocation)}
+                      onFocus={() => {
+                        setIsLocationDropdownOpen(true);
+                        setLocationSearch('');
+                      }}
+                      onChange={(e) => setLocationSearch(e.target.value)}
+                      className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-base"
+                      style={{ color: '#25324B' }}
+                    />
+
+                    {isLocationDropdownOpen && (
+                      <div className="absolute z-50 w-full mt-1 bg-white border border-gray-100 rounded-lg shadow-xl max-h-60 overflow-auto py-1">
+                        <div
+                          className="px-4 py-2 cursor-pointer hover:bg-gray-50 transition-colors text-sm"
+                          onClick={() => {
+                            setSelectedLocation('All');
+                            setIsLocationDropdownOpen(false);
+                            setLocationSearch('');
+                          }}
+                          style={{ color: selectedLocation === 'All' ? '#4640DE' : '#515B6F' }}
                         >
-                          {location}
-                        </span>
-                      </label>
-                    ))}
+                          All Locations
+                        </div>
+                        {locations
+                          .filter(loc => loc !== 'All' && loc.toLowerCase().includes(locationSearch.toLowerCase()))
+                          .map((location) => (
+                            <div
+                              key={location}
+                              className="px-4 py-2 cursor-pointer hover:bg-gray-50 transition-colors text-sm"
+                              onClick={() => {
+                                setSelectedLocation(location);
+                                setIsLocationDropdownOpen(false);
+                                setLocationSearch('');
+                              }}
+                              style={{ color: selectedLocation === location ? '#4640DE' : '#515B6F' }}
+                            >
+                              {location}
+                            </div>
+                          ))}
+                        {locations.filter(loc => loc !== 'All' && loc.toLowerCase().includes(locationSearch.toLowerCase())).length === 0 && (
+                          <div className="px-4 py-2 text-sm text-gray-400 italic">No locations found</div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
 

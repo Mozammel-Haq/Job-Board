@@ -17,7 +17,7 @@ export default function CategoryCard({
 
   return (
     <Link
-      href={`/jobs?category=${title.toLowerCase()}`}
+      href={`/jobs?category=${title}`}
       className={`
         flex items-center justify-between
         lg:flex-col lg:items-start lg:justify-start

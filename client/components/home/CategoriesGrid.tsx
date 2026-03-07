@@ -1,27 +1,55 @@
+'use client';
+
+import { useState, useEffect } from 'react';
 import CategoryCard from './CategoryCard';
 import Link from 'next/link';
+import { api } from '@/lib/api';
 
-const categories = [
-  { icon: '/images/categories/design.svg', title: 'Design', jobCount: 235, featured: false },
-  { icon: '/images/categories/sales.svg', title: 'Sales', jobCount: 756, featured: false },
-  { icon: '/images/categories/marketing.svg', title: 'Marketing', jobCount: 140, featured: true },
-  { icon: '/images/categories/finance.svg', title: 'Finance', jobCount: 325, featured: false },
-  { icon: '/images/categories/technology.svg', title: 'Technology', jobCount: 436, featured: false },
-  { icon: '/images/categories/engineering.svg', title: 'Engineering', jobCount: 542, featured: false },
-  { icon: '/images/categories/business.svg', title: 'Business', jobCount: 211, featured: false },
-  { icon: '/images/categories/human-resource.svg', title: 'Human Resource', jobCount: 346, featured: false },
-];
+const categoryIcons: Record<string, string> = {
+  'Design': '/images/categories/design.svg',
+  'Sales': '/images/categories/sales.svg',
+  'Marketing': '/images/categories/marketing.svg',
+  'Finance': '/images/categories/finance.svg',
+  'Technology': '/images/categories/technology.svg',
+  'Engineering': '/images/categories/engineering.svg',
+  'Business': '/images/categories/business.svg',
+  'Human Resource': '/images/categories/human-resource.svg',
+};
+
+const defaultIcon = '/images/categories/design.svg';
 
 export default function CategoriesGrid() {
+  const [dynamicCategories, setDynamicCategories] = useState<{ title: string; count: number; icon: string; featured: boolean }[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchCounts = async () => {
+      try {
+        const filters = await api.getJobFilters();
+        const mapped = filters.categories.map((cat, index) => ({
+          title: cat.name,
+          count: cat.count,
+          icon: categoryIcons[cat.name] || defaultIcon,
+          featured: cat.name === 'Marketing' // logic for featured if needed
+        }));
+        setDynamicCategories(mapped);
+      } catch (error) {
+        console.error('Failed to fetch category counts:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCounts();
+  }, []);
   return (
     <section id='categories' className="py-20" style={{ backgroundColor: '#F8F8FD' }}>
       <div className="container-custom">
-        
+
         {/* Section Header */}
         <div className="flex items-center justify-between mb-16">
-          <h2 
+          <h2
             className="text-4xl md:text-5xl font-bold"
-            style={{ 
+            style={{
               color: '#25324B',
               fontFamily: 'var(--font-family-display)'
             }}
@@ -30,7 +58,7 @@ export default function CategoriesGrid() {
             <span style={{ color: '#26A4FF' }}>category</span>
           </h2>
 
-          <Link 
+          <Link
             href="/jobs"
             className="hidden md:flex items-center gap-2 font-semibold transition-colors hover:text-primary"
             style={{ color: '#4640DE' }}
@@ -54,20 +82,28 @@ export default function CategoriesGrid() {
 
         {/* Categories Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {categories.map((category) => (
-            <CategoryCard
-              key={category.title}
-              icon={category.icon}
-              title={category.title}
-              jobCount={category.jobCount}
-              featured={category.featured}
-            />
-          ))}
+          {loading ? (
+            Array(8).fill(0).map((_, i) => (
+              <div key={i} className="h-40 bg-gray-100 animate-pulse rounded-lg"></div>
+            ))
+          ) : dynamicCategories.length > 0 ? (
+            dynamicCategories.map((category) => (
+              <CategoryCard
+                key={category.title}
+                icon={category.icon}
+                title={category.title}
+                jobCount={category.count}
+                featured={category.featured}
+              />
+            ))
+          ) : (
+            <div className="col-span-full text-center py-10 text-gray-400 italic">No categories available</div>
+          )}
         </div>
 
         {/* Mobile Show All Link */}
         <div className="md:hidden text-center">
-          <Link 
+          <Link
             href="/jobs"
             className="inline-flex items-center gap-2 font-semibold transition-colors hover:text-primary"
             style={{ color: '#4640DE' }}
