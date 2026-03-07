@@ -7,6 +7,8 @@ import Image from 'next/image';
 import Logo from '@/components/layout/Logo';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
+import { setAuthData } from '@/lib/auth';
+import { api } from '@/lib/api';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -50,27 +52,40 @@ export default function LoginPage() {
     return Object.keys(errors).length === 0;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
 
-    if (!validateForm()) return;
+// Replace the handleSubmit function:
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
 
-    setIsSubmitting(true);
+  if (!validateForm()) {
+    return;
+  }
 
-    setTimeout(() => {
-      localStorage.setItem('auth_token', 'mock-token-12345');
-      localStorage.setItem(
-        'user',
-        JSON.stringify({
-          name: 'Admin User',
-          email: formData.email,
-        })
-      );
+  setIsSubmitting(true);
 
-      setIsSubmitting(false);
-      router.push('/admin');
-    }, 1500);
-  };
+  try {
+    const response = await api.login({
+      email: formData.email,
+      password: formData.password,
+    });
+
+    // Store auth data
+    setAuthData(response.token, response.user);
+    
+    // Redirect to admin dashboard
+    router.push('/admin');
+  } catch (error: any) {
+    console.error('Login error:', error);
+    
+    if (error.errors?.email) {
+      setFormErrors({ email: error.errors.email[0] });
+    } else {
+      setFormErrors({ email: error.message || 'Login failed. Please try again.' });
+    }
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
   return (
     <div className="min-h-screen flex relative overflow-hidden">

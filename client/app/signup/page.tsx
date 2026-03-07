@@ -7,6 +7,7 @@ import Image from 'next/image';
 import Logo from '@/components/layout/Logo';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
+import { api } from '@/lib/api';
 
 export default function SignupPage() {
     const router = useRouter();
@@ -70,19 +71,37 @@ export default function SignupPage() {
         return Object.keys(errors).length === 0;
     };
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
 
-        if (!validateForm()) return;
+  if (!validateForm()) {
+    return;
+  }
 
-        setIsSubmitting(true);
+  setIsSubmitting(true);
 
-        // Mock signup (replace with API later)
-        setTimeout(() => {
-            setIsSubmitting(false);
-            router.push('/login?registered=true');
-        }, 1500);
-    };
+  try {
+    await api.register({
+      name: formData.name,
+      email: formData.email,
+      password: formData.password,
+      password_confirmation: formData.confirmPassword,
+    });
+
+    // Redirect to login
+    router.push('/login?registered=true');
+  } catch (error: any) {
+    console.error('Registration error:', error);
+    
+    if (error.errors) {
+      setFormErrors(error.errors);
+    } else {
+      setFormErrors({ email: error.message || 'Registration failed. Please try again.' });
+    }
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
     return (
         <div className="min-h-screen flex relative overflow-hidden">

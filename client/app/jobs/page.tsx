@@ -1,97 +1,65 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import JobCard from '@/components/jobs/JobCard';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
-import Image from 'next/image';
+import { api } from '@/lib/api';
+import { Job, PaginatedResponse } from '@/lib/types';
 
-// Sample job data (will come from API later)
-const allJobs = [
-  {
-    id: '1',
-    title: 'Senior Frontend Developer',
-    company: 'Google',
-    location: 'San Francisco, USA',
-    logo: '/images/companies/dropbox.svg',
-    description: 'We are looking for a Senior Frontend Developer to join our team and help build amazing user experiences.',
-    employmentType: 'Full Time',
-    categories: ['Technology', 'Design'],
-  },
-  {
-    id: '2',
-    title: 'Product Designer',
-    company: 'Facebook',
-    location: 'New York, USA',
-    logo: '/images/companies/revolut.svg',
-    description: 'Join our design team to create beautiful and intuitive products used by millions.',
-    employmentType: 'Full Time',
-    categories: ['Design', 'Business'],
-  },
-  {
-    id: '3',
-    title: 'Backend Engineer',
-    company: 'Amazon',
-    location: 'Seattle, USA',
-    logo: '/images/companies/pitch.svg',
-    description: 'Build scalable backend systems that power our global e-commerce platform.',
-    employmentType: 'Full Time',
-    categories: ['Technology'],
-  },
-  {
-    id: '4',
-    title: 'Marketing Manager',
-    company: 'Spotify',
-    location: 'London, UK',
-    logo: '/images/companies/blinkist.svg',
-    description: 'Lead marketing campaigns and help grow our user base across Europe.',
-    employmentType: 'Full Time',
-    categories: ['Marketing', 'Business'],
-  },
-  {
-    id: '5',
-    title: 'Data Scientist',
-    company: 'Netflix',
-    location: 'Los Angeles, USA',
-    logo: '/images/companies/canva.svg',
-    description: 'Use data to drive insights and improve our recommendation algorithms.',
-    employmentType: 'Full Time',
-    categories: ['Technology'],
-  },
-  {
-    id: '6',
-    title: 'UX Researcher',
-    company: 'Airbnb',
-    location: 'Remote',
-    logo: '/images/companies/godaddy.svg',
-    description: 'Conduct user research to improve our platform and enhance user experience.',
-    employmentType: 'Remote',
-    categories: ['Design'],
-  },
-];
-
-const categories = ['All', 'Design', 'Technology', 'Marketing', 'Business'];
-const jobTypes = ['All', 'Full Time', 'Part Time', 'Remote', 'Contract'];
+const categories = ['All', 'Design', 'Technology', 'Marketing', 'Business', 'Finance'];
+const jobTypes = ['All', 'Full Time', 'Part Time', 'Remote', 'Contract', 'Internship'];
 const locations = ['All', 'USA', 'UK', 'Europe', 'Remote'];
 
 export default function JobsPage() {
+  const searchParams = useSearchParams();
+  const [jobs, setJobs] = useState<Job[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [totalJobs, setTotalJobs] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedJobType, setSelectedJobType] = useState('All');
   const [selectedLocation, setSelectedLocation] = useState('All');
 
-  // Filter jobs based on selections
-  const filteredJobs = allJobs.filter(job => {
-    const matchesSearch = job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         job.company.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === 'All' || job.categories.includes(selectedCategory);
-    const matchesJobType = selectedJobType === 'All' || job.employmentType === selectedJobType;
-    const matchesLocation = selectedLocation === 'All' || job.location.includes(selectedLocation);
+  useEffect(() => {
+    loadJobs();
+  }, [searchTerm, selectedCategory, selectedJobType, selectedLocation, currentPage]);
 
-    return matchesSearch && matchesCategory && matchesJobType && matchesLocation;
-  });
+  const loadJobs = async () => {
+    setLoading(true);
+    try {
+      const response: PaginatedResponse<Job> = await api.getJobs({
+        search: searchTerm || undefined,
+        category: selectedCategory !== 'All' ? selectedCategory : undefined,
+        employment_type: selectedJobType !== 'All' ? selectedJobType : undefined,
+        location: selectedLocation !== 'All' ? selectedLocation : undefined,
+        page: currentPage,
+        per_page: 15,
+      });
+
+      setJobs(response.data);
+      setTotalJobs(response.meta.total);
+      setTotalPages(response.meta.last_page);
+    } catch (error) {
+      console.error('Failed to load jobs:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleClearFilters = () => {
+    setSearchTerm('');
+    setSelectedCategory('All');
+    setSelectedJobType('All');
+    setSelectedLocation('All');
+    setCurrentPage(1);
+  };
 
   return (
     <>
@@ -99,17 +67,16 @@ export default function JobsPage() {
       <main className="min-h-screen bg-white">
         
         {/* Page Header */}
-        <div className="bg-background-secondary py-12 pt-24">
-          <div className="container-custom relative z-10">
-                  <div className="absolute right-0 lg:top-0 md:top-20 top-80 w-[45%] h-full">
-                    <Image
-                      src="/images/Pattern.svg"
-                      alt=""
-                      fill
-                      className="object-cover object-center"
-                      priority
-                    />
-                  </div>
+        <div className="bg-background-secondary py-12">
+          <div className="container-custom">
+            <div className="mb-6">
+              <p className="text-base mb-2" style={{ color: '#515B6F' }}>
+                <span className="hover:text-primary cursor-pointer">Home</span>
+                {' '}/{' '}
+                <span style={{ color: '#25324B' }}>Find Jobs</span>
+              </p>
+            </div>
+            
             <h1 
               className="text-5xl font-bold mb-4"
               style={{ 
@@ -117,11 +84,11 @@ export default function JobsPage() {
                 fontFamily: 'var(--font-family-display)'
               }}
             >
-              Find Your <span className="text-primary">Dream</span> Job
+              Find Your Dream Job
             </h1>
             
             <p className="text-lg" style={{ color: '#515B6F' }}>
-              Showing {filteredJobs.length} jobs available
+              {loading ? 'Loading...' : `Showing ${totalJobs} jobs available`}
             </p>
           </div>
         </div>
@@ -242,12 +209,7 @@ export default function JobsPage() {
                 <Button
                   variant="outline"
                   fullWidth
-                  onClick={() => {
-                    setSearchTerm('');
-                    setSelectedCategory('All');
-                    setSelectedJobType('All');
-                    setSelectedLocation('All');
-                  }}
+                  onClick={handleClearFilters}
                 >
                   Clear All Filters
                 </Button>
@@ -256,44 +218,71 @@ export default function JobsPage() {
 
             {/* Jobs Grid */}
             <div className="lg:col-span-3">
-              {filteredJobs.length > 0 ? (
+              {loading ? (
+                <div className="flex items-center justify-center py-20">
+                  <div className="text-center">
+                    <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                    <p style={{ color: '#515B6F' }}>Loading jobs...</p>
+                  </div>
+                </div>
+              ) : jobs.length > 0 ? (
                 <>
                   <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                    {filteredJobs.map((job) => (
-                      <JobCard key={job.id} {...job} />
+                    {jobs.map((job) => (
+                      <JobCard
+                        key={job.id}
+                        id={String(job.id)}
+                        title={job.title}
+                        company={job.company}
+                        location={job.location}
+                        logo={job.logo || '/images/companies/dropbox.svg'}
+                        description={job.description}
+                        employmentType={job.employment_type}
+                        categories={[job.category]}
+                      />
                     ))}
                   </div>
 
-                  {/* Pagination Placeholder */}
-                  <div className="mt-12 flex justify-center">
-                    <div className="flex items-center gap-2">
-                      <button 
-                        className="px-4 py-2 border border-gray-200 hover:border-primary transition-colors"
-                        style={{ color: '#515B6F' }}
-                      >
-                        Previous
-                      </button>
-                      {[1, 2, 3].map((page) => (
-                        <button
-                          key={page}
-                          className="px-4 py-2 border transition-colors"
-                          style={{
-                            borderColor: page === 1 ? '#4640DE' : '#E5E7EB',
-                            backgroundColor: page === 1 ? '#4640DE' : 'transparent',
-                            color: page === 1 ? '#FFFFFF' : '#515B6F',
-                          }}
+                  {/* Pagination */}
+                  {totalPages > 1 && (
+                    <div className="mt-12 flex justify-center">
+                      <div className="flex items-center gap-2">
+                        <button 
+                          onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                          disabled={currentPage === 1}
+                          className="px-4 py-2 border border-gray-200 hover:border-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                          style={{ color: '#515B6F' }}
                         >
-                          {page}
+                          Previous
                         </button>
-                      ))}
-                      <button 
-                        className="px-4 py-2 border border-gray-200 hover:border-primary transition-colors"
-                        style={{ color: '#515B6F' }}
-                      >
-                        Next
-                      </button>
+                        {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                          const page = i + 1;
+                          return (
+                            <button
+                              key={page}
+                              onClick={() => setCurrentPage(page)}
+                              className="px-4 py-2 border transition-colors"
+                              style={{
+                                borderColor: page === currentPage ? '#4640DE' : '#E5E7EB',
+                                backgroundColor: page === currentPage ? '#4640DE' : 'transparent',
+                                color: page === currentPage ? '#FFFFFF' : '#515B6F',
+                              }}
+                            >
+                              {page}
+                            </button>
+                          );
+                        })}
+                        <button 
+                          onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                          disabled={currentPage === totalPages}
+                          className="px-4 py-2 border border-gray-200 hover:border-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                          style={{ color: '#515B6F' }}
+                        >
+                          Next
+                        </button>
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </>
               ) : (
                 <div className="text-center py-20">
@@ -309,15 +298,7 @@ export default function JobsPage() {
                   <p className="text-lg mb-6" style={{ color: '#515B6F' }}>
                     Try adjusting your filters to find more jobs
                   </p>
-                  <Button
-                    variant="primary"
-                    onClick={() => {
-                      setSearchTerm('');
-                      setSelectedCategory('All');
-                      setSelectedJobType('All');
-                      setSelectedLocation('All');
-                    }}
-                  >
+                  <Button variant="primary" onClick={handleClearFilters}>
                     Clear All Filters
                   </Button>
                 </div>

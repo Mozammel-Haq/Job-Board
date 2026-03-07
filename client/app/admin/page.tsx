@@ -5,45 +5,64 @@ import { useRouter } from 'next/navigation';
 import Sidebar from '@/components/admin/Sidebar';
 import TopBar from '@/components/admin/Topbar';
 import { isAuthenticated, getUser } from '@/lib/auth';
+import { api } from '@/lib/api';
 
-// Mock data
-const statsData = {
-  newCandidates: 76,
-  scheduleToday: 3,
-  messagesReceived: 24,
-};
-
-const chartData = [
-  { day: 'Mon', jobView: 180, jobApplied: 120 },
-  { day: 'Tue', jobView: 140, jobApplied: 160 },
-  { day: 'Wed', jobView: 200, jobApplied: 100 },
-  { day: 'Thu', jobView: 90, jobApplied: 180 },
-  { day: 'Fri', jobView: 190, jobApplied: 80 },
-  { day: 'Sat', jobView: 60, jobApplied: 100 },
-  { day: 'Sun', jobView: 120, jobApplied: 140 },
-];
-
-const applicantsSummary = {
-  fullTime: 45,
-  partTime: 24,
-  remote: 22,
-  internship: 32,
-  contract: 30,
+// Mock chart data - will be dynamic later
+const generateChartData = () => {
+  return [
+    { day: 'Mon', jobView: Math.floor(Math.random() * 200) + 50, jobApplied: Math.floor(Math.random() * 150) + 40 },
+    { day: 'Tue', jobView: Math.floor(Math.random() * 200) + 50, jobApplied: Math.floor(Math.random() * 150) + 40 },
+    { day: 'Wed', jobView: Math.floor(Math.random() * 200) + 50, jobApplied: Math.floor(Math.random() * 150) + 40 },
+    { day: 'Thu', jobView: Math.floor(Math.random() * 200) + 50, jobApplied: Math.floor(Math.random() * 150) + 40 },
+    { day: 'Fri', jobView: Math.floor(Math.random() * 200) + 50, jobApplied: Math.floor(Math.random() * 150) + 40 },
+    { day: 'Sat', jobView: Math.floor(Math.random() * 200) + 50, jobApplied: Math.floor(Math.random() * 150) + 40 },
+    { day: 'Sun', jobView: Math.floor(Math.random() * 200) + 50, jobApplied: Math.floor(Math.random() * 150) + 40 },
+  ];
 };
 
 export default function AdminDashboard() {
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
   const [selectedPeriod, setSelectedPeriod] = useState('Week');
   const [selectedTab, setSelectedTab] = useState('Overview');
+  const [hoveredBar, setHoveredBar] = useState<number | null>(null);
+  
+  const [stats, setStats] = useState({
+    total_jobs: 0,
+    active_jobs: 0,
+    total_applications: 0,
+    pending_applications: 0,
+  });
+
+  const [chartData, setChartData] = useState(generateChartData());
 
   useEffect(() => {
     if (!isAuthenticated()) {
       router.push('/login');
       return;
     }
-    setUser(getUser());
+    
+    const currentUser = getUser();
+    if (!currentUser?.is_admin) {
+      router.push('/');
+      return;
+    }
+    
+    setUser(currentUser);
+    loadDashboardData();
   }, [router]);
+
+  const loadDashboardData = async () => {
+    try {
+      const response = await api.getJobStatistics();
+      setStats(response);
+    } catch (error) {
+      console.error('Failed to load statistics:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   if (!user) {
     return (
@@ -57,6 +76,19 @@ export default function AdminDashboard() {
   }
 
   const maxValue = Math.max(...chartData.map(d => Math.max(d.jobView, d.jobApplied)));
+
+  // Calculate total views and applications
+  const totalViews = chartData.reduce((sum, d) => sum + d.jobView, 0);
+  const totalApplications = chartData.reduce((sum, d) => sum + d.jobApplied, 0);
+
+  // Calculate applicants breakdown
+  const applicantsSummary = {
+    fullTime: Math.floor(stats.total_applications * 0.35),
+    partTime: Math.floor(stats.total_applications * 0.20),
+    remote: Math.floor(stats.total_applications * 0.18),
+    internship: Math.floor(stats.total_applications * 0.15),
+    contract: Math.floor(stats.total_applications * 0.12),
+  };
 
   return (
     <div className="flex min-h-screen bg-background">
@@ -84,9 +116,9 @@ export default function AdminDashboard() {
             </div>
 
             {/* Date Range Selector */}
-            <div className="flex items-center gap-3 px-4 py-2 border border-gray-200 bg-white">
+            <div className="flex items-center gap-3 px-4 py-2 border border-gray-200 bg-white rounded-lg">
               <span style={{ color: '#515B6F' }}>Jul 19 - Jul 25</span>
-              <button>
+              <button className="hover:opacity-70 transition-opacity">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: '#515B6F' }}>
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
@@ -95,45 +127,65 @@ export default function AdminDashboard() {
           </div>
 
           {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            {/* New Candidates */}
-            <div className="p-6 rounded-lg flex items-center justify-between cursor-pointer transition-transform hover:scale-105" style={{ backgroundColor: '#4640DE' }}>
-              <div>
-                <p className="text-6xl font-bold text-white mb-2">{statsData.newCandidates}</p>
-                <p className="text-white text-lg">New candidates to review</p>
-              </div>
-              <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
+          {loading ? (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="p-6 rounded-lg bg-gray-100 animate-pulse h-32"></div>
+              ))}
             </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+              {/* New Candidates */}
+              <div 
+                className="p-6 rounded-lg flex items-center justify-between cursor-pointer transition-all duration-300 hover:shadow-lg hover:-translate-y-1" 
+                style={{ backgroundColor: '#4640DE' }}
+                onClick={() => router.push('/admin/applicants')}
+              >
+                <div>
+                  <p className="text-5xl font-bold text-white mb-2">{stats.pending_applications}</p>
+                  <p className="text-white text-lg">New candidates to review</p>
+                </div>
+                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </div>
 
-            {/* Schedule for Today */}
-            <div className="p-6 rounded-lg flex items-center justify-between cursor-pointer transition-transform hover:scale-105" style={{ backgroundColor: '#56CDAD' }}>
-              <div>
-                <p className="text-6xl font-bold text-white mb-2">{statsData.scheduleToday}</p>
-                <p className="text-white text-lg">Schedule for today</p>
+              {/* Schedule for Today */}
+              <div 
+                className="p-6 rounded-lg flex items-center justify-between cursor-pointer transition-all duration-300 hover:shadow-lg hover:-translate-y-1" 
+                style={{ backgroundColor: '#56CDAD' }}
+                onClick={() => router.push('/admin/schedule')}
+              >
+                <div>
+                  <p className="text-5xl font-bold text-white mb-2">3</p>
+                  <p className="text-white text-lg">Schedule for today</p>
+                </div>
+                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
               </div>
-              <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </div>
 
-            {/* Messages Received */}
-            <div className="p-6 rounded-lg flex items-center justify-between cursor-pointer transition-transform hover:scale-105" style={{ backgroundColor: '#26A4FF' }}>
-              <div>
-                <p className="text-6xl font-bold text-white mb-2">{statsData.messagesReceived}</p>
-                <p className="text-white text-lg">Messages received</p>
+              {/* Messages Received */}
+              <div 
+                className="p-6 rounded-lg flex items-center justify-between cursor-pointer transition-all duration-300 hover:shadow-lg hover:-translate-y-1" 
+                style={{ backgroundColor: '#26A4FF' }}
+                onClick={() => router.push('/admin/messages')}
+              >
+                <div>
+                  <p className="text-5xl font-bold text-white mb-2">{stats.total_applications}</p>
+                  <p className="text-white text-lg">Total applications</p>
+                </div>
+                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
               </div>
-              <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
             </div>
-          </div>
+          )}
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             
             {/* Job Statistics Chart */}
-            <div className="lg:col-span-2 bg-white p-6 border border-gray-100">
+            <div className="lg:col-span-2 bg-white p-6 border border-gray-100 rounded-lg">
               <div className="flex items-center justify-between mb-6">
                 <div>
                   <h2 className="text-xl font-bold mb-1" style={{ color: '#25324B' }}>
@@ -145,14 +197,17 @@ export default function AdminDashboard() {
                 </div>
 
                 {/* Period Tabs */}
-                <div className="flex gap-2">
+                <div className="flex gap-2 bg-background-secondary rounded-lg p-1">
                   {['Week', 'Month', 'Year'].map((period) => (
                     <button
                       key={period}
-                      onClick={() => setSelectedPeriod(period)}
-                      className={`px-4 py-2 text-sm font-medium transition-colors ${
+                      onClick={() => {
+                        setSelectedPeriod(period);
+                        setChartData(generateChartData());
+                      }}
+                      className={`px-4 py-2 text-sm font-medium transition-all rounded-md ${
                         selectedPeriod === period
-                          ? 'bg-background-secondary text-primary'
+                          ? 'bg-white text-primary shadow-sm'
                           : 'text-body hover:text-primary'
                       }`}
                     >
@@ -183,31 +238,38 @@ export default function AdminDashboard() {
               {/* Chart */}
               <div className="h-64 flex items-end justify-between gap-3">
                 {chartData.map((data, index) => (
-                  <div key={index} className="flex-1 flex flex-col items-center gap-2">
+                  <div 
+                    key={index} 
+                    className="flex-1 flex flex-col items-center gap-2"
+                    onMouseEnter={() => setHoveredBar(index)}
+                    onMouseLeave={() => setHoveredBar(null)}
+                  >
                     <div className="w-full flex flex-col gap-1 relative" style={{ height: '200px' }}>
+                      {/* Tooltip */}
+                      {hoveredBar === index && (
+                        <div className="absolute -top-20 left-1/2 -translate-x-1/2 bg-gray-800 text-white px-4 py-3 rounded-lg text-xs whitespace-nowrap z-10 shadow-lg">
+                          <div className="flex items-center gap-2 mb-1">
+                            <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#FFB836' }}></div>
+                            <span className="font-medium">Job Views: {data.jobView}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#4640DE' }}></div>
+                            <span className="font-medium">Applications: {data.jobApplied}</span>
+                          </div>
+                          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-full w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-800"></div>
+                        </div>
+                      )}
+                      
                       {/* Job View Bar */}
                       <div
-                        className="w-full rounded-t transition-all hover:opacity-80 cursor-pointer relative group"
+                        className="w-full rounded-t transition-all hover:opacity-80 cursor-pointer"
                         style={{
                           backgroundColor: '#FFB836',
                           height: `${(data.jobView / maxValue) * 100}%`,
                           marginTop: 'auto',
                         }}
-                      >
-                        {/* Tooltip */}
-                        {index === 2 && (
-                          <div className="absolute -top-16 left-1/2 -translate-x-1/2 bg-gray-800 text-white px-3 py-2 rounded text-xs whitespace-nowrap">
-                            <div className="flex items-center gap-2 mb-1">
-                              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#FFB836' }}></div>
-                              <span>122</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#4640DE' }}></div>
-                              <span>34</span>
-                            </div>
-                          </div>
-                        )}
-                      </div>
+                      ></div>
+                      
                       {/* Job Applied Bar */}
                       <div
                         className="w-full rounded-b transition-all hover:opacity-80 cursor-pointer"
@@ -241,7 +303,7 @@ export default function AdminDashboard() {
             <div className="space-y-6">
               
               {/* Job Views */}
-              <div className="bg-white p-6 border border-gray-100">
+              <div className="bg-white p-6 border border-gray-100 rounded-lg transition-all hover:shadow-md">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-lg font-bold" style={{ color: '#25324B' }}>
                     Job Views
@@ -254,7 +316,7 @@ export default function AdminDashboard() {
                   </div>
                 </div>
                 <p className="text-4xl font-bold mb-2" style={{ color: '#25324B' }}>
-                  2,342
+                  {totalViews.toLocaleString()}
                 </p>
                 <p className="text-sm flex items-center gap-1" style={{ color: '#56CDAD' }}>
                   This Week 6.4%
@@ -265,7 +327,7 @@ export default function AdminDashboard() {
               </div>
 
               {/* Job Applied */}
-              <div className="bg-white p-6 border border-gray-100">
+              <div className="bg-white p-6 border border-gray-100 rounded-lg transition-all hover:shadow-md">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-lg font-bold" style={{ color: '#25324B' }}>
                     Job Applied
@@ -277,7 +339,7 @@ export default function AdminDashboard() {
                   </div>
                 </div>
                 <p className="text-4xl font-bold mb-2" style={{ color: '#25324B' }}>
-                  654
+                  {totalApplications.toLocaleString()}
                 </p>
                 <p className="text-sm flex items-center gap-1" style={{ color: '#FF6550' }}>
                   This Week 0.5%
@@ -288,59 +350,112 @@ export default function AdminDashboard() {
               </div>
 
               {/* Job Open */}
-              <div className="bg-white p-6 border border-gray-100">
+              <div className="bg-white p-6 border border-gray-100 rounded-lg transition-all hover:shadow-md">
                 <h3 className="text-lg font-bold mb-4" style={{ color: '#25324B' }}>
                   Job Open
                 </h3>
-                <p className="text-5xl font-bold mb-2" style={{ color: '#25324B' }}>
-                  12
-                </p>
-                <p className="text-base" style={{ color: '#515B6F' }}>
-                  Jobs Opened
-                </p>
+                {loading ? (
+                  <div className="animate-pulse">
+                    <div className="h-12 bg-gray-200 rounded mb-2"></div>
+                    <div className="h-4 bg-gray-200 rounded w-24"></div>
+                  </div>
+                ) : (
+                  <>
+                    <p className="text-5xl font-bold mb-2" style={{ color: '#25324B' }}>
+                      {stats.active_jobs}
+                    </p>
+                    <p className="text-base" style={{ color: '#515B6F' }}>
+                      Jobs Opened
+                    </p>
+                  </>
+                )}
               </div>
 
               {/* Applicants Summary */}
-              <div className="bg-white p-6 border border-gray-100">
+              <div className="bg-white p-6 border border-gray-100 rounded-lg transition-all hover:shadow-md">
                 <h3 className="text-lg font-bold mb-4" style={{ color: '#25324B' }}>
                   Applicants Summary
                 </h3>
-                <p className="text-5xl font-bold mb-4" style={{ color: '#25324B' }}>
-                  67
-                </p>
-                <p className="text-base mb-6" style={{ color: '#515B6F' }}>
-                  Applicants
-                </p>
-
-                {/* Progress Bar */}
-                <div className="h-2 bg-gray-100 rounded-full overflow-hidden mb-4 flex">
-                  <div style={{ width: '33%', backgroundColor: '#4640DE' }}></div>
-                  <div style={{ width: '18%', backgroundColor: '#56CDAD' }}></div>
-                  <div style={{ width: '16%', backgroundColor: '#26A4FF' }}></div>
-                  <div style={{ width: '24%', backgroundColor: '#FFB836' }}></div>
-                  <div style={{ width: '22%', backgroundColor: '#FF6550' }}></div>
-                </div>
-
-                {/* Legend */}
-                <div className="space-y-3">
-                  {[
-                    { label: 'Full Time', value: applicantsSummary.fullTime, color: '#4640DE' },
-                    { label: 'Part-Time', value: applicantsSummary.partTime, color: '#56CDAD' },
-                    { label: 'Remote', value: applicantsSummary.remote, color: '#26A4FF' },
-                    { label: 'Internship', value: applicantsSummary.internship, color: '#FFB836' },
-                    { label: 'Contract', value: applicantsSummary.contract, color: '#FF6550' },
-                  ].map((item) => (
-                    <div key={item.label} className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }}></div>
-                        <span className="text-sm" style={{ color: '#515B6F' }}>{item.label}</span>
-                      </div>
-                      <span className="text-sm font-semibold" style={{ color: '#25324B' }}>
-                        {item.value}
-                      </span>
+                {loading ? (
+                  <div className="animate-pulse space-y-3">
+                    <div className="h-12 bg-gray-200 rounded"></div>
+                    <div className="h-2 bg-gray-200 rounded"></div>
+                    <div className="space-y-2">
+                      {[1, 2, 3, 4, 5].map(i => (
+                        <div key={i} className="h-4 bg-gray-200 rounded"></div>
+                      ))}
                     </div>
-                  ))}
-                </div>
+                  </div>
+                ) : (
+                  <>
+                    <p className="text-5xl font-bold mb-4" style={{ color: '#25324B' }}>
+                      {stats.total_applications}
+                    </p>
+                    <p className="text-base mb-6" style={{ color: '#515B6F' }}>
+                      Applicants
+                    </p>
+
+                    {/* Progress Bar */}
+                    <div className="h-2 bg-gray-100 rounded-full overflow-hidden mb-4 flex">
+                      <div 
+                        className="transition-all duration-500"
+                        style={{ 
+                          width: `${(applicantsSummary.fullTime / stats.total_applications) * 100}%`, 
+                          backgroundColor: '#4640DE' 
+                        }}
+                      ></div>
+                      <div 
+                        className="transition-all duration-500"
+                        style={{ 
+                          width: `${(applicantsSummary.partTime / stats.total_applications) * 100}%`, 
+                          backgroundColor: '#56CDAD' 
+                        }}
+                      ></div>
+                      <div 
+                        className="transition-all duration-500"
+                        style={{ 
+                          width: `${(applicantsSummary.remote / stats.total_applications) * 100}%`, 
+                          backgroundColor: '#26A4FF' 
+                        }}
+                      ></div>
+                      <div 
+                        className="transition-all duration-500"
+                        style={{ 
+                          width: `${(applicantsSummary.internship / stats.total_applications) * 100}%`, 
+                          backgroundColor: '#FFB836' 
+                        }}
+                      ></div>
+                      <div 
+                        className="transition-all duration-500"
+                        style={{ 
+                          width: `${(applicantsSummary.contract / stats.total_applications) * 100}%`, 
+                          backgroundColor: '#FF6550' 
+                        }}
+                      ></div>
+                    </div>
+
+                    {/* Legend */}
+                    <div className="space-y-3">
+                      {[
+                        { label: 'Full Time', value: applicantsSummary.fullTime, color: '#4640DE' },
+                        { label: 'Part-Time', value: applicantsSummary.partTime, color: '#56CDAD' },
+                        { label: 'Remote', value: applicantsSummary.remote, color: '#26A4FF' },
+                        { label: 'Internship', value: applicantsSummary.internship, color: '#FFB836' },
+                        { label: 'Contract', value: applicantsSummary.contract, color: '#FF6550' },
+                      ].map((item) => (
+                        <div key={item.label} className="flex items-center justify-between hover:bg-background-secondary px-2 py-1 rounded transition-colors">
+                          <div className="flex items-center gap-2">
+                            <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }}></div>
+                            <span className="text-sm" style={{ color: '#515B6F' }}>{item.label}</span>
+                          </div>
+                          <span className="text-sm font-semibold" style={{ color: '#25324B' }}>
+                            {item.value}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           </div>
