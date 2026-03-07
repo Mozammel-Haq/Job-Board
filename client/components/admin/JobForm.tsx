@@ -219,7 +219,7 @@ export default function JobForm({ id }: { id?: string }) {
                   <div className="relative w-20 h-20 rounded-xl border bg-white shadow-sm overflow-hidden">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
-                      src={logoPreview || formData.logo}
+                      src={logoPreview || api.getStorageUrl(formData.logo)}
                       alt="Logo preview"
                       className="w-full h-full object-contain p-1"
                     />

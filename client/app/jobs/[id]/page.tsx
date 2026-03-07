@@ -182,8 +182,8 @@ export default function JobDetailPage() {
           {notification && (
             <div
               className={`mb-6 rounded-lg border p-4 flex items-start gap-3 ${notification.type === 'success'
-                  ? 'border-green-200 bg-green-50'
-                  : 'border-red-200 bg-red-50'
+                ? 'border-green-200 bg-green-50'
+                : 'border-red-200 bg-red-50'
                 }`}
             >
               <div className="mt-0.5">
@@ -231,13 +231,13 @@ export default function JobDetailPage() {
                       job.logo.toLowerCase().endsWith('.svg') ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img
-                          src={job.logo}
+                          src={api.getStorageUrl(job.logo)}
                           alt={`${job.company} logo`}
                           className="object-contain w-20 h-20"
                         />
                       ) : (
                         <Image
-                          src={job.logo}
+                          src={api.getStorageUrl(job.logo)}
                           alt={`${job.company} logo`}
                           fill
                           className="object-contain"

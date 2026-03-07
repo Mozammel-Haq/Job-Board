@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import Badge from '@/components/ui/Badge';
+import { api } from '@/lib/api';
 
 interface JobCardProps {
   id: string;
@@ -26,7 +27,7 @@ export default function JobCard({
   return (
     <Link href={`/jobs/${id}`}>
       <div className="bg-white border border-gray-300 p-6 h-full transition-all duration-300 hover:shadow-lg hover:border-primary group">
-        
+
         {/* Header */}
         <div className="flex items-start justify-between mb-6">
           {/* Logo */}
@@ -34,13 +35,13 @@ export default function JobCard({
             {logo?.toLowerCase().endsWith('.svg') ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
-                src={logo}
+                src={api.getStorageUrl(logo)}
                 alt={`${company} logo`}
                 className="object-contain w-12 h-12"
               />
             ) : (
               <Image
-                src={logo}
+                src={api.getStorageUrl(logo)}
                 alt={`${company} logo`}
                 fill
                 className="object-contain"
@@ -65,7 +66,7 @@ export default function JobCard({
           {/* Job Title */}
           <h3
             className="text-xl font-semibold group-hover:text-primary transition-colors"
-            style={{ 
+            style={{
               color: '#25324B',
               fontFamily: 'var(--font-family-display)'
             }}

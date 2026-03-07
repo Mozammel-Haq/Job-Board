@@ -234,6 +234,22 @@ class ApiService {
   async getJobApplications(jobId: string) {
     return this.request(`/admin/jobs/${jobId}/applications`);
   }
+
+  getStorageUrl(url: string | null | undefined): string {
+    if (!url) return '';
+    if (typeof window === 'undefined') return url;
+
+    // If it's already a relative path or an SVG from the public dir, return as is
+    if (!url.startsWith('http')) return url;
+
+    // Check if the URL contains '/storage/' to identify backend assets
+    const storageIndex = url.indexOf('/storage/');
+    if (storageIndex !== -1) {
+      return '/storage-proxy/' + url.substring(storageIndex + 9);
+    }
+
+    return url;
+  }
 }
 
 export const api = new ApiService();

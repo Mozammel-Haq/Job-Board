@@ -26,10 +26,17 @@ const nextConfig: NextConfig = {
     ],
   },
   async rewrites() {
+    const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
+    const storageBase = apiBase.replace(/\/api$/, '/storage');
+
     return [
       {
         source: '/api-proxy/:path*',
-        destination: `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api'}/:path*`,
+        destination: `${apiBase}/:path*`,
+      },
+      {
+        source: '/storage-proxy/:path*',
+        destination: `${storageBase}/:path*`,
       },
     ];
   },

@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
+import { api } from '@/lib/api';
 
 interface JobListItemProps {
   id: string;
@@ -23,11 +24,11 @@ export default function JobListItem({
   return (
     <Link href={`/jobs/${id}`}>
       <div className="flex items-start gap-4 p-6 bg-white border border-gray-100 hover:border-primary hover:shadow-md transition-all duration-300 group">
-        
+
         {/* Company Logo */}
         <div className="w-16 h-16 flex-shrink-0 relative">
           <Image
-            src={logo}
+            src={api.getStorageUrl(logo)}
             alt={`${company} logo`}
             fill
             className="object-contain"
@@ -57,9 +58,9 @@ export default function JobListItem({
             <span
               className="px-3 py-1 text-sm font-medium rounded-2xl"
               style={{
-  backgroundColor: 'rgba(86, 205, 173, 0.18)',
-  color: 'rgba(86, 205, 173, 1)',
-}}
+                backgroundColor: 'rgba(86, 205, 173, 0.18)',
+                color: 'rgba(86, 205, 173, 1)',
+              }}
             >
               {employmentType}
             </span>
